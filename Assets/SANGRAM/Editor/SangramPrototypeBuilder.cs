@@ -52,11 +52,11 @@ public static class SangramPrototypeBuilder
         {
             GameObject bot = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             bot.name = "Practice Enemy";
-            bot.tag = "Enemy";
             bot.transform.position = new Vector3(Random.Range(-35f, 35f), 1f,
                 Random.Range(18f, 45f));
             bot.GetComponent<Renderer>().sharedMaterial = MakeMaterial(new Color(.55f, .12f, .1f));
-            bot.AddComponent<Health>();
+            Health botHealth = bot.AddComponent<Health>();
+            botHealth.destroyOnDeath = true;
             bot.AddComponent<PracticeBot>();
         }
 
