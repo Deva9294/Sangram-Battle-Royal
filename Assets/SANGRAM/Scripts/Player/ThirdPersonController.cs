@@ -28,21 +28,25 @@ public class ThirdPersonController : MonoBehaviour
 
         HandleLook();
         HandleMovement();
+        SangramMobileInput.ResetFrameInput();
     }
 
     private void HandleLook()
     {
         if (cameraTransform == null) return;
-        yaw += Input.GetAxis("Mouse X") * lookSensitivity;
-        pitch = Mathf.Clamp(pitch - Input.GetAxis("Mouse Y") * lookSensitivity, -25f, 65f);
+        Vector2 touchLook = SangramMobileInput.Look;
+        yaw += Input.GetAxis("Mouse X") * lookSensitivity + touchLook.x;
+        pitch = Mathf.Clamp(pitch - Input.GetAxis("Mouse Y") * lookSensitivity - touchLook.y, -25f, 65f);
         transform.rotation = Quaternion.Euler(0f, yaw, 0f);
         cameraTransform.rotation = Quaternion.Euler(pitch, yaw, 0f);
     }
 
     private void HandleMovement()
     {
-        float x = Input.GetAxisRaw("Horizontal");
-        float z = Input.GetAxisRaw("Vertical");
+        Vector2 inputMove = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        if (SangramMobileInput.Move.sqrMagnitude > 0.001f) inputMove = SangramMobileInput.Move;
+        float x = inputMove.x;
+        float z = inputMove.y;
         Vector3 forward = cameraTransform
             ? Vector3.ProjectOnPlane(cameraTransform.forward, Vector3.up).normalized
             : transform.forward;
@@ -51,9 +55,9 @@ public class ThirdPersonController : MonoBehaviour
             : transform.right;
         Vector3 move = Vector3.ClampMagnitude(forward * z + right * x, 1f);
 
-        float speed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : walkSpeed;
+        float speed = (Input.GetKey(KeyCode.LeftShift) || SangramMobileInput.Sprint) ? sprintSpeed : walkSpeed;
         if (controller.isGrounded && verticalVelocity < 0f) verticalVelocity = -2f;
-        if (controller.isGrounded && Input.GetButtonDown("Jump"))
+        if (controller.isGrounded && (Input.GetButtonDown("Jump") || SangramMobileInput.JumpPressed))
             verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
 
         verticalVelocity += gravity * Time.deltaTime;
