@@ -45,6 +45,7 @@ public static class SangramPrototypeBuilder
         rig.target = player.transform;
         ThirdPersonController controller = player.AddComponent<ThirdPersonController>();
         controller.cameraTransform = camera.transform;
+        BuildMobileHud();
         WeaponController weapon = player.AddComponent<WeaponController>();
         weapon.aimCamera = camera;
 
@@ -74,6 +75,55 @@ public static class SangramPrototypeBuilder
         AssetDatabase.SaveAssets();
         EditorUtility.DisplayDialog("SANGRAM",
             "Prototype scene created. Press Play to test.", "OK");
+    }
+
+
+    private static void BuildMobileHud()
+    {
+        GameObject root = new GameObject("SANGRAM Mobile HUD");
+        Canvas canvas = root.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        CanvasScaler scaler = root.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
+        root.AddComponent<GraphicRaycaster>();
+        if (Object.FindObjectOfType<EventSystem>() == null)
+        {
+            GameObject es = new GameObject("EventSystem");
+            es.AddComponent<EventSystem>();
+            es.AddComponent<StandaloneInputModule>();
+        }
+        RectTransform look = MakeHudPanel(canvas.transform, "Look Area", new Vector2(.48f, 0f), new Vector2(1f, 1f), new Color(1,1,1,.015f));
+        look.gameObject.AddComponent<MobileLookArea>();
+        RectTransform stick = MakeHudPanel(canvas.transform, "Movement Joystick", new Vector2(.04f,.07f), new Vector2(.22f,.38f), new Color(.05f,.08f,.12f,.42f));
+        stick.gameObject.AddComponent<MobileJoystick>();
+        MakeHudButton(canvas.transform, "FIRE", MobileAction.Fire, new Vector2(.84f,.28f), new Vector2(.96f,.48f));
+        MakeHudButton(canvas.transform, "JUMP", MobileAction.Jump, new Vector2(.75f,.08f), new Vector2(.84f,.23f));
+        MakeHudButton(canvas.transform, "SPRINT", MobileAction.Sprint, new Vector2(.23f,.08f), new Vector2(.34f,.20f));
+        MakeHudButton(canvas.transform, "RELOAD", MobileAction.Reload, new Vector2(.86f,.53f), new Vector2(.96f,.65f));
+    }
+
+    private static RectTransform MakeHudPanel(Transform parent, string name, Vector2 min, Vector2 max, Color color)
+    {
+        GameObject go = new GameObject(name, typeof(RectTransform), typeof(Image));
+        go.transform.SetParent(parent, false);
+        RectTransform rect = go.GetComponent<RectTransform>();
+        rect.anchorMin = min; rect.anchorMax = max; rect.offsetMin = Vector2.zero; rect.offsetMax = Vector2.zero;
+        go.GetComponent<Image>().color = color;
+        return rect;
+    }
+
+    private static void MakeHudButton(Transform parent, string label, MobileAction action, Vector2 min, Vector2 max)
+    {
+        RectTransform rect = MakeHudPanel(parent, label + " Button", min, max, new Color(.04f,.12f,.22f,.78f));
+        rect.gameObject.AddComponent<MobileActionButton>().action = action;
+        GameObject textGo = new GameObject("Label", typeof(RectTransform), typeof(Text));
+        textGo.transform.SetParent(rect, false);
+        RectTransform tr = textGo.GetComponent<RectTransform>();
+        tr.anchorMin = Vector2.zero; tr.anchorMax = Vector2.one; tr.offsetMin = Vector2.zero; tr.offsetMax = Vector2.zero;
+        Text t = textGo.GetComponent<Text>();
+        t.text = label; t.alignment = TextAnchor.MiddleCenter; t.color = Color.white;
+        t.font = Resources.GetBuiltinResource<Font>("Arial.ttf"); t.fontSize = 24; t.fontStyle = FontStyle.Bold; t.raycastTarget = false;
     }
 
     private static Material MakeMaterial(Color color)
