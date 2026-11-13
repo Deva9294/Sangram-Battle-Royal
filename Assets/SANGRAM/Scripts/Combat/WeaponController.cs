@@ -23,8 +23,8 @@ public class WeaponController : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.R)) StartCoroutine(Reload());
-        if (Input.GetButton("Fire1") && Time.time >= nextShot && !reloading) Fire();
+        if (Input.GetKeyDown(KeyCode.R) || SangramMobileInput.ReloadPressed) StartCoroutine(Reload());
+        if ((Input.GetButton("Fire1") || SangramMobileInput.Fire) && Time.time >= nextShot && !reloading) Fire();
     }
 
     private void Fire()
