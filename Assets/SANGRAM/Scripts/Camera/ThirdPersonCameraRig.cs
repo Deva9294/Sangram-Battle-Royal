@@ -12,6 +12,6 @@ public class ThirdPersonCameraRig : MonoBehaviour
         Vector3 desired = target.position + target.rotation * offset;
         transform.position = Vector3.Lerp(transform.position, desired,
             1f - Mathf.Exp(-followSharpness * Time.deltaTime));
-        transform.LookAt(target.position + Vector3.up * 1.45f);
+        // Rotation is owned by ThirdPersonController so mouse/touch look is not overwritten.
     }
 }
