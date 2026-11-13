@@ -20,6 +20,7 @@ Unity 3D Android game starter. This repository contains the source foundation fo
 - Space: jump
 - Left mouse: fire
 - R: reload
+- Android: left joystick to move, drag right side to look, FIRE/JUMP/SPRINT/RELOAD touch buttons
 
 ## Included
 - Third-person movement and camera
