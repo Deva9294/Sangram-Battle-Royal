@@ -66,8 +66,8 @@ func _build_world():
         _tree(Vector3(x, 0, z))
     safe_ring = MeshInstance3D.new()
     var ring = TorusMesh.new()
-    ring.inner_radius = 0.18
-    ring.outer_radius = 0.28
+    ring.inner_radius = 94.5
+    ring.outer_radius = 95.0
     ring.rings = 8
     ring.ring_segments = 96
     safe_ring.mesh = ring
