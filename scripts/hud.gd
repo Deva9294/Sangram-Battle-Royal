@@ -24,17 +24,19 @@ func _ready():
     _button("◀", Vector2(25, -122), Vector2(65, 60), "left")
     _button("▶", Vector2(155, -122), Vector2(65, 60), "right")
     var hint = Label.new()
-    hint.text = "WASD: Move  |  Mouse: Aim  |  Click: Fire  |  R: Reload  |  Space: Jump"
+    hint.text = "WASD: MOVE  |  MOUSE: AIM  |  CLICK: FIRE  |  R: RELOAD  |  SPACE: JUMP"
     hint.position = Vector2(22, 62)
-    hint.add_theme_color_override("font_color", Color(1,1,1,0.85))
+    hint.add_theme_font_size_override("font_size", 14)
+    hint.add_theme_color_override("font_color", Color(1,1,1,0.9))
     add_child(hint)
 
 func _button(caption: String, offset: Vector2, size: Vector2, action: String):
     var b = Button.new()
     b.text = caption
     b.custom_minimum_size = size
-    b.anchor_left = 1.0
-    b.anchor_right = 1.0
+    var is_move_button = action in ["forward", "back", "left", "right"]
+    b.anchor_left = 0.0 if is_move_button else 1.0
+    b.anchor_right = 0.0 if is_move_button else 1.0
     b.anchor_top = 1.0
     b.anchor_bottom = 1.0
     b.offset_left = offset.x
