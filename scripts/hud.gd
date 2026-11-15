@@ -7,6 +7,7 @@ var mobile_left := false
 var mobile_right := false
 var mobile_forward := false
 var mobile_back := false
+var radar_timer := 0.0
 
 func _ready():
     set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -29,6 +30,30 @@ func _ready():
     hint.add_theme_font_size_override("font_size", 14)
     hint.add_theme_color_override("font_color", Color(1,1,1,0.9))
     add_child(hint)
+
+func _process(delta):
+    radar_timer += delta
+    if radar_timer >= 0.2:
+        radar_timer = 0.0
+        queue_redraw()
+
+func _draw():
+    var center = Vector2(get_viewport_rect().size.x - 105, 142)
+    var radius = 69.0
+    draw_circle(center, radius + 7.0, Color(0.015,0.025,0.03,0.72))
+    draw_arc(center, radius, 0, TAU, 64, Color(0.78,0.82,0.77,0.9), 2.0)
+    draw_arc(center, radius * 0.5, 0, TAU, 48, Color(0.55,0.65,0.62,0.38), 1.0)
+    draw_line(center + Vector2(-radius,0), center + Vector2(radius,0), Color(0.55,0.65,0.62,0.28), 1.0)
+    draw_line(center + Vector2(0,-radius), center + Vector2(0,radius), Color(0.55,0.65,0.62,0.28), 1.0)
+    if player and is_instance_valid(player):
+        for enemy in get_tree().get_nodes_in_group("bots"):
+            if not is_instance_valid(enemy): continue
+            var offset = Vector2(enemy.global_position.x - player.global_position.x, enemy.global_position.z - player.global_position.z)
+            var point = center + Vector2(offset.x, offset.y) * 0.55
+            if point.distance_to(center) <= radius - 4:
+                draw_circle(point, 3.2, Color(1.0,0.25,0.16))
+    draw_circle(center, 5.0, Color(0.25,0.95,0.68))
+    draw_string(ThemeDB.fallback_font, center + Vector2(-14, radius + 22), "RADAR", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.88,0.92,0.88))
 
 func _button(caption: String, offset: Vector2, size: Vector2, action: String):
     var b = Button.new()
