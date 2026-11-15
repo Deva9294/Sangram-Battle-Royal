@@ -84,6 +84,7 @@ func _physics_process(delta):
     velocity.z = direction.z * move_speed
     if not is_on_floor(): velocity.y -= 22.0 * delta
     elif Input.is_action_just_pressed("ui_accept"): velocity.y = 7.0
+    if Input.is_action_just_pressed("reload"): reload()
     move_and_slide()
     if Input.is_action_pressed("fire") or mobile_fire:
         shoot()
