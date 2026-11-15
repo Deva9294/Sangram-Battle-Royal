@@ -26,6 +26,9 @@ func _process(delta):
     if player and is_instance_valid(player):
         if Vector2(player.global_position.x, player.global_position.z).length() > safe_radius:
             player.take_damage(5.0 * delta)
+        if player.eliminated:
+            game_over = true
+            return
     var remaining = get_tree().get_nodes_in_group("bots").size()
     if hud: hud.update_stats(player, remaining, safe_radius, elapsed)
     if remaining == 0 and not game_over:
@@ -133,6 +136,7 @@ func _build_hud():
     hud.set_script(script)
     layer.add_child(hud)
     hud.player = player
+    player.hud = hud
 
 func bot_eliminated():
     pass
