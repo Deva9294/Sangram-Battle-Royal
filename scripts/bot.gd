@@ -42,7 +42,7 @@ func _physics_process(delta):
         velocity.z = move_toward(velocity.z, 0, speed)
         if attack_timer <= 0:
             attack_timer = 1.15
-            target.take_damage(7.0)
+            target.call("take_damage", 7.0)
     if not is_on_floor(): velocity.y -= 20.0 * delta
     move_and_slide()
 
