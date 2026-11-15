@@ -69,14 +69,28 @@ func update_stats(p, remaining: int, zone: float, time: float):
     stats.text = "SANGRAM  |  HP %d  |  AMMO %d/%d  |  ENEMIES %d  |  ZONE %.0fm  |  %02d:%02d" % [int(p.health), p.ammo, p.reserve_ammo, remaining, zone, int(time) / 60, int(time) % 60]
 
 func show_result(won: bool):
-    var panel = Panel.new()
-    panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-    panel.position = Vector2(-220, -95)
-    panel.size = Vector2(440, 190)
-    add_child(panel)
+    if result_panel and is_instance_valid(result_panel):
+        return
+    result_panel = Panel.new()
+    result_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+    result_panel.position = Vector2(-230, -115)
+    result_panel.size = Vector2(460, 230)
+    add_child(result_panel)
+    var layout = VBoxContainer.new()
+    layout.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    layout.add_theme_constant_override("separation", 18)
+    result_panel.add_child(layout)
     var label = Label.new()
-    label.text = "BOOYAH! YOU ARE THE CHAMPION" if won else "YOU HAVE BEEN ELIMINATED"
-    label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-    label.position = Vector2(-195, -25)
+    label.text = "BOOYAH! CHAMPION" if won else "YOU HAVE BEEN ELIMINATED"
+    label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     label.add_theme_font_size_override("font_size", 25)
-    panel.add_child(label)
+    layout.add_child(label)
+    var subtitle = Label.new()
+    subtitle.text = "All opponents eliminated" if won else "Try another drop and fight again"
+    subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    layout.add_child(subtitle)
+    var restart = Button.new()
+    restart.text = "PLAY AGAIN"
+    restart.custom_minimum_size = Vector2(180, 54)
+    restart.pressed.connect(func(): get_tree().reload_current_scene())
+    layout.add_child(restart)
