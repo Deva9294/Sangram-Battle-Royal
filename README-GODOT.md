@@ -1,18 +1,24 @@
-# SANGRAM — Godot offline Android prototype
+# SANGRAM — MP Lobby and Offline Battle Royale prototype
 
-This is the Godot 4 migration track. The original Unity source is retained for reference; this project uses only Godot and generated primitive art, with no paid assets or online services.
+Godot 4.3 Android migration track. Original Unity project and main branch remain untouched while this upgrade is developed on `mp-lobby-upgrade`.
 
-## Current playable scope
-- Offline single-player third-person arena prototype
-- Procedurally generated village-style arena, houses, trees and cover
-- Third-person player, hitscan shooting, ammo and reload
-- 24 simple AI opponents that chase and attack
-- Shrinking safe zone with damage outside the ring
-- Health/ammo/enemy HUD and touch buttons for movement, aim, fire, jump and reload
+## Current prototype scope
+- New deployment lobby with three selectable fictional operators and a 3D hangar preview
+- Operator preview has basic gear/rifle silhouette and subtle idle motion
+- Deploy button opens the offline Malwa Frontier battlefield
+- Madhya Pradesh-inspired rural environment: village clusters, fields, lanes, stream crossing and tree belts
+- Third-person movement, hitscan shooting, ammo/reload and 24 simple chasing AI bots
+- Shrinking safe zone, health/ammo HUD and a live enemy radar minimap
+- Android touch buttons for movement, aim, fire, jump and reload
 
 ## Controls
 - Desktop: WASD, mouse aim, left click fire, R reload, Space jump
 - Android: on-screen movement/fire/reload/jump controls; drag the right side to aim
 
+## Important production gaps
+This is still an early offline prototype. The lobby character and world are procedural placeholder geometry, not photorealistic production assets. It does not yet include rigged character animation, high-resolution PBR texture packs, full terrain heightmap, loot/inventory, parachute, vehicles, online multiplayer, anti-cheat or real-device QA.
+
+The requested separate large-world data package (PCK/OBB-style delivery) is not wired yet. A Godot PCK sidecar needs an in-game download/load path; a legacy Android OBB file is not automatically consumed by this build.
+
 ## Build
-Open this folder in Godot 4.3+ (GL Compatibility renderer). Configure an Android export preset and export a debug APK. This is an offline prototype, not a finished commercial battle-royale product: it has no multiplayer, parachute, loot/inventory, vehicles, anti-cheat or production device QA yet.
+Use Godot 4.3+ with the Android export templates and the Android preset in `export_presets.cfg`. The CI workflow is configured for both `godot-migration` and `mp-lobby-upgrade`.
