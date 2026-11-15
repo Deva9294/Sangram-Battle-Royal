@@ -1,35 +1,28 @@
-# SANGRAM — India's Battle Royale
+# SANGRAM — Offline Android Battle Royale Prototype
 
-Unity 3D Android game starter. This repository contains the source foundation for an offline third-person shooter prototype.
+The active migration is being developed on the **godot-migration** branch using Godot 4.3 (free and open source). The original Unity starter files are retained in this branch as reference while the Godot version is validated.
 
-## Requirements
-- Unity 2022.3 LTS
-- Android Build Support, Android SDK & NDK Tools, OpenJDK (install through Unity Hub)
+## Godot project
+- Open the repository root in Godot 4.3 or newer.
+- Main scene: `scenes/main.tscn`
+- Android export preset: `Android`
+- Android CI workflow: `.github/workflows/godot-android.yml`
 
-## Setup
-1. Create a Unity 3D (Core) project.
-2. Copy this repository's `Assets` folder into the Unity project.
-3. Open the project and run **Tools > SANGRAM > Create Prototype Scene**.
-4. Open `Assets/SANGRAM/Scenes/SANGRAM_Prototype.unity` and press Play.
-5. To build Android: File > Build Settings > Android > Switch Platform. Set package id to `in.devacore.sangram`, Landscape orientation, then Build.
+## Implemented prototype systems
+- Offline third-person arena
+- Procedural village-style environment with houses, trees and cover
+- Player movement, aiming, hitscan firing, ammunition and reload
+- 24 basic AI opponents
+- Shrinking safe zone and outside-zone damage
+- HUD and touch controls for movement, firing, jump and reload
 
-## Prototype controls
-- WASD: move
-- Mouse: rotate camera
-- Shift: sprint
-- Space: jump
-- Left mouse: fire
-- R: reload
-- Android: left joystick to move, drag right side to look, FIRE/JUMP/SPRINT/RELOAD touch buttons
+## Controls
+- Desktop: WASD to move, mouse to aim, left click to fire, R to reload, Space to jump.
+- Android: use the on-screen movement/action buttons and drag on the right side to aim.
 
-## Included
-- Third-person movement and camera
-- Hitscan weapon with ammo/reload
-- Health and simple practice enemy AI
-- Shrinking safe-zone damage prototype
-- Unity Editor scene generator
+## Build status and scope
+GitHub Actions is configured to export a **debug APK** and upload it as a workflow artifact when the Godot branch is updated. The APK is not considered ready until that workflow succeeds and the build is installed and tested on a real Android device.
 
-## Roadmap / not yet included
-Touch HUD, production art/audio, inventory and loot, parachute, vehicles, online matchmaking, authoritative multiplayer servers, anti-cheat, account/progression systems, 50–100 player hosting, device QA and signed release APK. These are future milestones; this starter is not yet a finished multiplayer game or APK.
+This is an offline single-player prototype, not a finished online multiplayer game. Multiplayer matchmaking, loot/inventory, vehicles, parachute, anti-cheat, production art/audio, performance tuning and device QA remain future work.
 
 Use only assets that you own or are properly licensed to use.
