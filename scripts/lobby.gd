@@ -3,14 +3,21 @@ extends Node3D
 var selected_operator := 0
 var preview_root: Node3D
 var operator_names := ["VEER", "TARA", "RUDRA"]
-var operator_roles := ["ASSAULT • MADHYA FRONTIER", "RECON • CENTRAL INDIA", "SUPPORT • NARMADA UNIT"]
+var operator_roles := ["ASSAULT • MALWA FRONTIER", "RECON • CENTRAL INDIA", "SUPPORT • NARMADA UNIT"]
 var operator_colors := [Color(0.24,0.31,0.22), Color(0.20,0.30,0.38), Color(0.38,0.27,0.18)]
 var info_label: Label
+var idle_time := 0.0
 
 func _ready():
     _build_lobby_world()
     _build_interface()
     _show_operator()
+
+func _process(delta):
+    idle_time += delta
+    if preview_root and is_instance_valid(preview_root):
+        preview_root.rotation.y = sin(idle_time * 0.32) * 0.12
+        preview_root.position.y = sin(idle_time * 1.2) * 0.025
 
 func _build_lobby_world():
     var env_node = WorldEnvironment.new()
@@ -22,14 +29,11 @@ func _build_lobby_world():
     env.ambient_light_energy = 0.65
     env_node.environment = env
     add_child(env_node)
-
     var key = DirectionalLight3D.new()
     key.rotation_degrees = Vector3(-25,-35,0)
     key.light_energy = 1.7
     key.shadow_enabled = true
     add_child(key)
-
-    # Cinematic military hangar / staging bay built from 3D geometry.
     _add_box(Vector3(0,-0.25,0), Vector3(30,0.5,24), Color(0.075,0.09,0.10))
     _add_box(Vector3(0,6,-8), Vector3(30,12,0.6), Color(0.09,0.12,0.13))
     for x in [-13.0,13.0]:
@@ -65,14 +69,12 @@ func _build_interface():
     shade.color = Color(0.015,0.025,0.035,0.42)
     shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     layer.add_child(shade)
-
     var top = Label.new()
     top.text = "D E V A C O R E   S T U D I O     •     PRESENTS"
     top.position = Vector2(34,22)
     top.add_theme_font_size_override("font_size",15)
     top.add_theme_color_override("font_color",Color(0.92,0.72,0.42))
     layer.add_child(top)
-
     var logo = Label.new()
     logo.text = "SANGRAM"
     logo.position = Vector2(30,50)
@@ -82,14 +84,12 @@ func _build_interface():
     logo.add_theme_constant_override("shadow_offset_x",3)
     logo.add_theme_constant_override("shadow_offset_y",3)
     layer.add_child(logo)
-
     var subtitle = Label.new()
     subtitle.text = "BATTLE ROYALE  /  MADHYA PRADESH"
     subtitle.position = Vector2(36,112)
     subtitle.add_theme_font_size_override("font_size",15)
     subtitle.add_theme_color_override("font_color",Color(0.85,0.88,0.88))
     layer.add_child(subtitle)
-
     var panel = PanelContainer.new()
     panel.position = Vector2(28,180)
     panel.size = Vector2(360,455)
@@ -100,43 +100,36 @@ func _build_interface():
     panel_style.set_corner_radius_all(8)
     panel.add_theme_stylebox_override("panel",panel_style)
     layer.add_child(panel)
-
     var layout = VBoxContainer.new()
     layout.add_theme_constant_override("separation",12)
     layout.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     panel.add_child(layout)
-
     var heading = Label.new()
     heading.text = "DEPLOYMENT LOBBY"
     heading.add_theme_font_size_override("font_size",21)
     heading.add_theme_color_override("font_color",Color(0.96,0.72,0.35))
     layout.add_child(heading)
-
     info_label = Label.new()
     info_label.custom_minimum_size = Vector2(0,62)
     info_label.add_theme_font_size_override("font_size",17)
     info_label.add_theme_color_override("font_color",Color.WHITE)
     layout.add_child(info_label)
-
     var choose = Label.new()
     choose.text = "SELECT YOUR OPERATOR"
     choose.add_theme_font_size_override("font_size",13)
     choose.add_theme_color_override("font_color",Color(0.65,0.75,0.78))
     layout.add_child(choose)
-
     for i in range(operator_names.size()):
         var b = Button.new()
         b.text = "%02d   %s" % [i+1,operator_names[i]]
         b.custom_minimum_size = Vector2(0,44)
         b.pressed.connect(_select_operator.bind(i))
         layout.add_child(b)
-
     var map_label = Label.new()
     map_label.text = "MAP  •  MALWA FRONTIER, MADHYA PRADESH\nMODE  •  OFFLINE SURVIVAL  •  24 ENEMIES"
     map_label.add_theme_font_size_override("font_size",13)
     map_label.add_theme_color_override("font_color",Color(0.78,0.84,0.83))
     layout.add_child(map_label)
-
     var deploy = Button.new()
     deploy.text = "▶   DEPLOY"
     deploy.custom_minimum_size = Vector2(0,58)
@@ -147,7 +140,6 @@ func _build_interface():
     deploy.add_theme_stylebox_override("normal",deploy_style)
     deploy.pressed.connect(_deploy)
     layout.add_child(deploy)
-
     var foot = Label.new()
     foot.text = "CHARACTER / TRAINING LOBBY  •  BUILD 0.2"
     foot.position = Vector2(32, get_viewport().get_visible_rect().size.y - 32)
@@ -178,6 +170,12 @@ func _show_operator():
     _part(Vector3(0.2,0.06,0.08),Vector3(0.34,0.18,0.48),Color(0.07,0.08,0.08))
     _part(Vector3(0,1.12,-0.38),Vector3(0.24,0.42,0.16),Color(0.22,0.24,0.21))
     _part(Vector3(0.35,1.36,-0.03),Vector3(0.12,0.52,0.12),Color(0.12,0.13,0.12))
+    # Distinct rifle silhouette, chest rig, radio and utility pouches.
+    _part(Vector3(0.38,1.02,-0.53),Vector3(0.12,0.92,0.12),Color(0.055,0.065,0.06))
+    _part(Vector3(0.38,1.48,-0.53),Vector3(0.16,0.18,0.16),Color(0.09,0.10,0.09))
+    _part(Vector3(-0.22,1.12,-0.39),Vector3(0.18,0.20,0.12),Color(0.55,0.39,0.17))
+    _part(Vector3(0.0,1.12,-0.40),Vector3(0.18,0.20,0.12),Color(0.55,0.39,0.17))
+    _part(Vector3(-0.34,1.40,0.08),Vector3(0.18,0.26,0.18),Color(0.12,0.14,0.13))
     if info_label:
         info_label.text = "%s\n%s" % [operator_names[selected_operator],operator_roles[selected_operator]]
 
