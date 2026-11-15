@@ -3,7 +3,7 @@ name: SANGRAM Godot Android APK
 on:
   workflow_dispatch:
   push:
-    branches: [godot-migration]
+    branches: [godot-migration, mp-lobby-upgrade]
     paths:
       - 'project.godot'
       - 'scenes/**'
