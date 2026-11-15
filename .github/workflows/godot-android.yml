@@ -54,9 +54,22 @@ jobs:
           EOF
           keytool -genkeypair -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
 
+      - name: Diagnose Android export configuration
+        run: |
+          echo "Godot export templates:"
+          ls -la "$HOME/.local/share/godot/export_templates/4.3.stable"
+          echo "Android SDK platforms:"
+          ls -la "$ANDROID_HOME/platforms" || true
+          echo "Android SDK build tools:"
+          ls -la "$ANDROID_HOME/build-tools" || true
+          echo "Debug keystore:"
+          ls -l "$GITHUB_WORKSPACE/debug.keystore"
+          echo "Godot editor settings:"
+          cat "$HOME/.config/godot/editor_settings-4.tres"
+
       - name: Export Android debug APK
         run: |
-          godot --headless --path . --export-debug "Android" build/SANGRAM.apk
+          godot --headless --path . --export-debug "Android" build/SANGRAM.apk --verbose
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
