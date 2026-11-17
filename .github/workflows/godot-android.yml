@@ -1,0 +1,47 @@
+name: Build SANGRAM Godot Android APK
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'project.godot'
+      - 'scenes/**'
+      - 'scripts/**'
+      - 'export_presets.cfg'
+      - '.github/workflows/godot-android.yml'
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Godot 4
+        run: |
+          GODOT_VERSION=4.4.1
+          wget -q https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip
+          unzip -q Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip
+          sudo mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 /usr/local/bin/godot
+          sudo chmod +x /usr/local/bin/godot
+          mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          wget -q https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz
+          unzip -q Godot_v${GODOT_VERSION}-stable_export_templates.tpz -d /tmp/godot-templates
+          cp -a /tmp/godot-templates/templates/. ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Import project
+        run: godot --headless --editor --path . --quit
+      - name: Export Android APK
+        run: |
+          mkdir -p build
+          godot --headless --path . --export-debug Android build/SANGRAM.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SANGRAM-Godot-Android-APK
+          path: build/SANGRAM.apk
+          if-no-files-found: error
+          retention-days: 14
