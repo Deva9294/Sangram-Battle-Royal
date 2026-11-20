@@ -13,6 +13,8 @@ var target: Node3D
 var attack_timer := 0.0
 var alive := true
 var visual_root: Node3D
+var visual_animation: AnimationPlayer
+var visual_animation_name := ""
 
 func _ready() -> void:
     health = max_health
@@ -22,6 +24,33 @@ func _ready() -> void:
 func _build_soldier() -> void:
     visual_root = Node3D.new()
     add_child(visual_root)
+    var model_paths := [
+        "res://assets/characters/Rifleman.glb",
+        "res://assets/characters/ReconScout.glb",
+        "res://assets/characters/ArmySniper.glb",
+        "res://assets/characters/CombatMedic.glb"
+    ]
+    var model_path: String = model_paths[randi_range(0, model_paths.size() - 1)]
+    if ResourceLoader.exists(model_path):
+        var model_scene := load(model_path) as PackedScene
+        if model_scene:
+            var model := model_scene.instantiate()
+            model.rotation.y = PI
+            visual_root.add_child(model)
+            visual_animation = _find_animation_player(model)
+            _play_visual_animation("Idle")
+    if visual_animation == null:
+        _build_procedural_soldier()
+
+    var collision := CollisionShape3D.new()
+    var shape := CapsuleShape3D.new()
+    shape.radius = 0.38
+    shape.height = 1.8
+    collision.shape = shape
+    collision.position.y = 0.9
+    add_child(collision)
+
+func _build_procedural_soldier() -> void:
     _part(Vector3(0, 1.0, 0), Vector3(0.62, 0.78, 0.34), Color(0.23, 0.29, 0.22))
     _part(Vector3(0, 1.53, 0), Vector3(0.38, 0.42, 0.38), Color(0.57, 0.43, 0.32), true)
     _part(Vector3(0, 1.78, 0), Vector3(0.48, 0.22, 0.46), Color(0.13, 0.17, 0.14))
@@ -31,16 +60,29 @@ func _build_soldier() -> void:
     _part(Vector3(-0.18, 0.39, 0), Vector3(0.23, 0.72, 0.25), Color(0.12, 0.15, 0.13))
     _part(Vector3(0.18, 0.39, 0), Vector3(0.23, 0.72, 0.25), Color(0.12, 0.15, 0.13))
     _part(Vector3(0.34, 1.16, -0.43), Vector3(0.11, 0.12, 0.78), Color(0.055, 0.065, 0.06))
-    _part(Vector3(0.34, 1.16, -0.84), Vector3(0.09, 0.09, 0.34), Color(0.09, 0.10, 0.09))
-    _part(Vector3(0.34, 1.16, -0.1), Vector3(0.16, 0.2, 0.16), Color(0.08, 0.09, 0.08))
 
-    var collision := CollisionShape3D.new()
-    var shape := CapsuleShape3D.new()
-    shape.radius = 0.38
-    shape.height = 1.8
-    collision.shape = shape
-    collision.position.y = 0.9
-    add_child(collision)
+func _find_animation_player(node: Node) -> AnimationPlayer:
+    if node is AnimationPlayer:
+        return node as AnimationPlayer
+    for child in node.get_children():
+        var found := _find_animation_player(child)
+        if found:
+            return found
+    return null
+
+func _play_visual_animation(animation_name: String) -> void:
+    if visual_animation and visual_animation.has_animation(animation_name) and visual_animation_name != animation_name:
+        visual_animation.play(animation_name)
+        visual_animation_name = animation_name
+
+func _update_visual_animation() -> void:
+    if visual_animation == null or not alive:
+        return
+    var horizontal_speed := Vector2(velocity.x, velocity.z).length()
+    var next_animation := "Idle"
+    if horizontal_speed > 0.2:
+        next_animation = "Run" if horizontal_speed > move_speed * 0.85 else "Walk"
+    _play_visual_animation(next_animation)
 
 func _part(pos: Vector3, size: Vector3, color: Color, sphere := false) -> void:
     var mesh := MeshInstance3D.new()
@@ -89,6 +131,7 @@ func _physics_process(delta: float) -> void:
     if not is_on_floor():
         velocity.y -= 22.0 * delta
     move_and_slide()
+    _update_visual_animation()
 
 func _has_line_of_sight() -> bool:
     if not is_instance_valid(target):
@@ -105,5 +148,8 @@ func take_damage(amount: float, attacker: Node = null) -> void:
     health = maxf(0.0, health - amount)
     if health <= 0.0:
         alive = false
+        velocity = Vector3.ZERO
+        set_physics_process(false)
+        _play_visual_animation("Death")
         get_tree().call_group("game_manager", "bot_eliminated", attacker)
-        queue_free()
+        get_tree().create_timer(2.0).timeout.connect(queue_free)
