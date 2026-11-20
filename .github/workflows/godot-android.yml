@@ -1,4 +1,4 @@
-name: SANGRAM Godot Android APK
+name: SANGRAM Godot Android APK - Player Upgrade
 
 on:
   workflow_dispatch:
