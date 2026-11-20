@@ -9,6 +9,10 @@ var operator_roles := ["ASSAULT • MALWA FRONTIER", "RECON • CENTRAL INDIA", 
 var operator_colors := [Color(0.24,0.31,0.22), Color(0.20,0.30,0.38), Color(0.38,0.27,0.18)]
 var info_label: Label
 var idle_time := 0.0
+var matchmaking_active := false
+var matchmaking_remaining := 12.0
+var matchmaking_label: Label
+var matchmaking_panel: PanelContainer
 
 func _ready():
     _build_lobby_world()
@@ -20,6 +24,13 @@ func _process(delta):
     if preview_root and is_instance_valid(preview_root):
         preview_root.rotation.y = sin(idle_time * 0.32) * 0.12
         preview_root.position.y = sin(idle_time * 1.2) * 0.025
+    if matchmaking_active:
+        matchmaking_remaining = maxf(0.0, matchmaking_remaining - delta)
+        if matchmaking_label:
+            matchmaking_label.text = "SEARCHING FOR OPERATORS  •  OFFLINE BOT FILL\\nESTIMATED WAIT: 00:%02d\\nMATCH STARTING..." % int(ceil(matchmaking_remaining))
+        if matchmaking_remaining <= 0.0:
+            matchmaking_active = false
+            get_tree().change_scene_to_file("res://scenes/game.tscn")
 
 func _build_lobby_world():
     var env_node = WorldEnvironment.new()
@@ -226,4 +237,41 @@ func _part(pos: Vector3, size: Vector3, color: Color, sphere := false):
     preview_root.add_child(mesh)
 
 func _deploy():
-    get_tree().change_scene_to_file("res://scenes/game.tscn")
+    if matchmaking_active:
+        return
+    matchmaking_active = true
+    matchmaking_remaining = 12.0
+    matchmaking_panel = PanelContainer.new()
+    matchmaking_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+    matchmaking_panel.position = Vector2(-230, -105)
+    matchmaking_panel.size = Vector2(460, 210)
+    matchmaking_panel.z_index = 20
+    var style := StyleBoxFlat.new()
+    style.bg_color = Color(0.015, 0.035, 0.045, 0.97)
+    style.border_color = Color(0.95, 0.48, 0.12, 1.0)
+    style.set_border_width_all(2)
+    style.set_corner_radius_all(10)
+    matchmaking_panel.add_theme_stylebox_override("panel", style)
+    var box := VBoxContainer.new()
+    box.add_theme_constant_override("separation", 14)
+    matchmaking_panel.add_child(box)
+    var title := Label.new()
+    title.text = "MATCHMAKING"
+    title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    title.add_theme_font_size_override("font_size", 26)
+    title.add_theme_color_override("font_color", Color(1.0, 0.68, 0.25))
+    box.add_child(title)
+    matchmaking_label = Label.new()
+    matchmaking_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    matchmaking_label.add_theme_font_size_override("font_size", 17)
+    matchmaking_label.add_theme_color_override("font_color", Color.WHITE)
+    box.add_child(matchmaking_label)
+    var cancel := Button.new()
+    cancel.text = "CANCEL SEARCH"
+    cancel.custom_minimum_size = Vector2(0, 42)
+    cancel.pressed.connect(func():
+        matchmaking_active = false
+        matchmaking_panel.queue_free()
+    )
+    box.add_child(cancel)
+    get_tree().current_scene.add_child(matchmaking_panel)
