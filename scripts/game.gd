@@ -169,14 +169,14 @@ func _spawn_loot() -> void:
         pickup.set_script(LootScript)
         var roll := i % 3
         if roll == 0:
-            pickup.loot_type = "ammo"
-            pickup.amount = 45
+            pickup.set("loot_type", "ammo")
+            pickup.set("amount", 45)
         elif roll == 1:
-            pickup.loot_type = "medkit"
-            pickup.amount = 1
+            pickup.set("loot_type", "medkit")
+            pickup.set("amount", 1)
         else:
-            pickup.loot_type = "armor"
-            pickup.amount = 30
+            pickup.set("loot_type", "armor")
+            pickup.set("amount", 30)
         var x := randf_range(-86.0, 86.0)
         var z := randf_range(-86.0, 86.0)
         if Vector2(x, z).length() < 16.0:
