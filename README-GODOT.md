@@ -1,10 +1,10 @@
 # SANGRAM — MP Lobby and Offline Battle Royale prototype
 
-Godot 4.3 Android migration track. Original Unity project and main branch remain untouched while this upgrade is developed on `mp-lobby-upgrade`.
+Godot 4.3 Android game branch. This is the active SANGRAM build; legacy Unity starter files are not used by the Godot project.
 
 ## Current prototype scope
 - New deployment lobby with three selectable fictional operators and a 3D hangar preview
-- Operator preview has basic gear/rifle silhouette and subtle idle motion
+- Operator preview uses rigged 3D character models with an idle animation
 - Deploy button opens the offline Malwa Frontier battlefield
 - Madhya Pradesh-inspired rural environment: village clusters, fields, lanes, stream crossing and tree belts
 - Third-person player controller with walk/sprint/crouch/prone, jump, camera look, ADS/FOV transitions, hitscan rifle fire, recoil and reload
@@ -20,7 +20,7 @@ Godot 4.3 Android migration track. Original Unity project and main branch remain
 - Android: on-screen movement/fire/reload/jump controls; drag the right side to aim
 
 ## Important production gaps
-This is an early offline gameplay prototype, not a finished photorealistic commercial game. Soldier visuals and much of the environment are still procedural meshes. Production work remains: rigged character animations, high-quality PBR assets, detailed terrain, proper weapon animations/audio, parachute, vehicles, navigation-mesh AI, performance profiling and real-device QA. Online multiplayer and anti-cheat are not implemented.
+This is an early offline gameplay prototype, not a finished photorealistic commercial game. Rigged animated low-poly soldiers are now integrated, while much of the environment is still procedural. Production work remains: high-quality PBR environment assets, detailed terrain, proper weapon animations/audio, parachute, vehicles, navigation-mesh AI, performance profiling and real-device QA. Online multiplayer and anti-cheat are not implemented.
 
 The requested separate large-world data package (PCK/OBB-style delivery) is not wired yet. A Godot PCK sidecar needs an in-game download/load path; a legacy Android OBB file is not automatically consumed by this build.
 
