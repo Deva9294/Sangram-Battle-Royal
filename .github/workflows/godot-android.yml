@@ -1,13 +1,14 @@
-name: SANGRAM Godot Android APK
+name: SANGRAM Godot Android APK - Gameplay Update
 
 on:
   workflow_dispatch:
   push:
-    branches: [godot-migration]
+    branches: [godot-migration, mp-lobby-upgrade, godot-player-upgrade]
     paths:
       - 'project.godot'
       - 'scenes/**'
       - 'scripts/**'
+      - 'tools/**'
       - 'export_presets.cfg'
       - '.github/workflows/godot-android.yml'
 
@@ -30,8 +31,28 @@ jobs:
             cp -a /root/.local/share/godot/export_templates/4.3.stable "$HOME/.local/share/godot/export_templates/"
           fi
 
+      - name: Install asset downloader
+        run: apt-get update -qq && apt-get install -y -qq curl
+
+      - name: Download CC0 soldier models for offline game
+        run: bash tools/download_cc0_assets.sh
+
       - name: Validate project and import assets
         run: godot --headless --editor --path . --quit
+
+      - name: Smoke test deployment lobby at runtime
+        shell: bash
+        run: |
+          set -o pipefail
+          godot --headless --path . --quit-after 4 2>&1 | tee /tmp/sangram-lobby.log
+          if grep -E "SCRIPT ERROR|Parse Error" /tmp/sangram-lobby.log; then exit 1; fi
+
+      - name: Smoke test battle scene at runtime
+        shell: bash
+        run: |
+          set -o pipefail
+          godot --headless --fixed-fps 60 --path . --quit-after 3600 res://scenes/game.tscn 2>&1 | tee /tmp/sangram-game.log
+          if grep -E "SCRIPT ERROR|Parse Error" /tmp/sangram-game.log; then exit 1; fi
 
       - name: Configure Android SDK and debug signing
         run: |

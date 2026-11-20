@@ -1,18 +1,28 @@
-# SANGRAM — Godot offline Android prototype
+# SANGRAM — MP Lobby and Offline Battle Royale prototype
 
-This is the Godot 4 migration track. The original Unity source is retained for reference; this project uses only Godot and generated primitive art, with no paid assets or online services.
+Godot 4.3 Android migration track. Original Unity project and main branch remain untouched while this upgrade is developed on `mp-lobby-upgrade`.
 
-## Current playable scope
-- Offline single-player third-person arena prototype
-- Procedurally generated village-style arena, houses, trees and cover
-- Third-person player, hitscan shooting, ammo and reload
-- 24 simple AI opponents that chase and attack
-- Shrinking safe zone with damage outside the ring
-- Health/ammo/enemy HUD and touch buttons for movement, aim, fire, jump and reload
+## Current prototype scope
+- New deployment lobby with three selectable fictional operators and a 3D hangar preview
+- Operator preview has basic gear/rifle silhouette and subtle idle motion
+- Deploy button opens the offline Malwa Frontier battlefield
+- Madhya Pradesh-inspired rural environment: village clusters, fields, lanes, stream crossing and tree belts
+- Third-person player controller with walk/sprint/crouch/prone, jump, camera look, ADS/FOV transitions, hitscan rifle fire, recoil and reload
+- Rigged, animated soldier models (Rifleman, Recon Scout, Army Sniper and Combat Medic) with Idle/Walk/Run/Death animations; procedural fallback if assets are not present
+- 24 armed AI opponents that pursue, check line of sight and fire at the player
+- Mobile analog movement joystick plus aim, sprint, crouch, prone, fire, jump and reload touch controls
+- Battlefield pickups: ammo, medkits and armor; armor absorbs part of incoming damage, medkits restore health
+- Shrinking safe zone, health/ammo HUD and a live enemy radar minimap
+- Android touch controls for movement, aim, fire, jump, reload, pickup and medkit
 
 ## Controls
 - Desktop: WASD, mouse aim, left click fire, R reload, Space jump
 - Android: on-screen movement/fire/reload/jump controls; drag the right side to aim
 
+## Important production gaps
+This is an early offline gameplay prototype, not a finished photorealistic commercial game. Soldier visuals and much of the environment are still procedural meshes. Production work remains: rigged character animations, high-quality PBR assets, detailed terrain, proper weapon animations/audio, parachute, vehicles, navigation-mesh AI, performance profiling and real-device QA. Online multiplayer and anti-cheat are not implemented.
+
+The requested separate large-world data package (PCK/OBB-style delivery) is not wired yet. A Godot PCK sidecar needs an in-game download/load path; a legacy Android OBB file is not automatically consumed by this build.
+
 ## Build
-Open this folder in Godot 4.3+ (GL Compatibility renderer). Configure an Android export preset and export a debug APK. This is an offline prototype, not a finished commercial battle-royale product: it has no multiplayer, parachute, loot/inventory, vehicles, anti-cheat or production device QA yet.
+Use Godot 4.3+ with the Android export templates and the Android preset in `export_presets.cfg`. Before opening the project locally, run `bash tools/download_cc0_assets.sh` once to fetch the CC0 GLB soldier models; they are then bundled into the APK for offline play. The CI workflow performs this step automatically and runs lobby plus 60-second battle-scene smoke tests before exporting.
