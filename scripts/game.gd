@@ -200,3 +200,6 @@ func bot_eliminated(attacker = null):
 
 func player_eliminated():
     game_over = true
+    for enemy in get_tree().get_nodes_in_group("bots"):
+        if is_instance_valid(enemy):
+            enemy.set_physics_process(false)
