@@ -159,6 +159,23 @@ func _show_operator():
     preview_root = Node3D.new()
     preview_root.position = Vector3(1.9,0,0)
     add_child(preview_root)
+    var model_paths := [
+        "res://assets/characters/Rifleman.glb",
+        "res://assets/characters/ReconScout.glb",
+        "res://assets/characters/ArmySniper.glb"
+    ]
+    var model_path: String = model_paths[selected_operator]
+    if ResourceLoader.exists(model_path):
+        var model_scene := load(model_path) as PackedScene
+        if model_scene:
+            var model := model_scene.instantiate()
+            preview_root.add_child(model)
+            var animation := _find_animation_player(model)
+            if animation and animation.has_animation("Idle"):
+                animation.play("Idle")
+            if info_label:
+                info_label.text = "%s\n%s" % [operator_names[selected_operator], operator_roles[selected_operator]]
+            return
     var suit = operator_colors[selected_operator]
     _part(Vector3(0,1.05,0),Vector3(0.75,0.9,0.42),suit)
     _part(Vector3(0,1.78,0),Vector3(0.44,0.48,0.42),Color(0.72,0.52,0.37),true)
@@ -180,6 +197,15 @@ func _show_operator():
     _part(Vector3(-0.34,1.40,0.08),Vector3(0.18,0.26,0.18),Color(0.12,0.14,0.13))
     if info_label:
         info_label.text = "%s\n%s" % [operator_names[selected_operator],operator_roles[selected_operator]]
+
+func _find_animation_player(node: Node) -> AnimationPlayer:
+    if node is AnimationPlayer:
+        return node as AnimationPlayer
+    for child in node.get_children():
+        var found := _find_animation_player(child)
+        if found:
+            return found
+    return null
 
 func _part(pos: Vector3, size: Vector3, color: Color, sphere := false):
     var mesh = MeshInstance3D.new()
