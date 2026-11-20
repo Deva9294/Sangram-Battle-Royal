@@ -5,8 +5,9 @@ const BotScript = preload("res://scripts/bot.gd")
 const LootScript = preload("res://scripts/loot_pickup.gd")
 var player
 var hud
-var bot_count := 24
+var bot_count := 12
 var elapsed := 0.0
+var battle_start_grace := 12.0
 var safe_radius := 95.0
 var game_over := false
 var safe_ring: MeshInstance3D
@@ -29,11 +30,12 @@ func _ready():
 func _process(delta):
     if game_over or not match_started: return
     elapsed += delta
+    battle_start_grace = maxf(0.0, battle_start_grace - delta)
     var shrink_elapsed = maxf(0.0, elapsed - ZONE_WAIT)
     safe_radius = maxf(ZONE_MIN_RADIUS, 95.0 - shrink_elapsed * ZONE_SHRINK_RATE)
     if safe_ring:
         safe_ring.scale = Vector3(safe_radius / 95.0, 1.0, safe_radius / 95.0)
-    if player and is_instance_valid(player) and not player.eliminated:
+    if player and is_instance_valid(player) and not player.eliminated and battle_start_grace <= 0.0:
         var player_distance = Vector2(player.global_position.x, player.global_position.z).length()
         if player_distance > safe_radius:
             player.take_damage(5.5 * delta)
