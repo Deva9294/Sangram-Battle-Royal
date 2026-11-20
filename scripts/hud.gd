@@ -1,5 +1,7 @@
 extends Control
 
+const VirtualJoystick = preload("res://scripts/virtual_joystick.gd")
+
 var player
 var stats: Label
 var message_label: Label
@@ -44,16 +46,26 @@ func _ready():
     _button("PRONE", Vector2(-82, -225), Vector2(76, 46), "prone")
     _button("PICKUP", Vector2(-278, -280), Vector2(86, 46), "interact")
     _button("MEDKIT", Vector2(-180, -280), Vector2(86, 46), "use_medkit")
-    _button("▲", Vector2(92, -194), Vector2(66, 60), "forward")
-    _button("▼", Vector2(92, -58), Vector2(66, 60), "back")
-    _button("◀", Vector2(24, -126), Vector2(66, 60), "left")
-    _button("▶", Vector2(160, -126), Vector2(66, 60), "right")
+    _add_virtual_stick()
     var hint = Label.new()
     hint.text = "WASD MOVE  •  AIM  •  SPRINT  •  CROUCH  •  PRONE  •  FIRE"
     hint.position = Vector2(22, 62)
     hint.add_theme_font_size_override("font_size", 13)
     hint.add_theme_color_override("font_color", Color(1,1,1,0.9))
     add_child(hint)
+
+func _add_virtual_stick() -> void:
+    var stick = VirtualJoystick.new()
+    stick.anchor_left = 0.0
+    stick.anchor_right = 0.0
+    stick.anchor_top = 1.0
+    stick.anchor_bottom = 1.0
+    stick.offset_left = 28.0
+    stick.offset_right = 192.0
+    stick.offset_top = -194.0
+    stick.offset_bottom = -30.0
+    stick.changed.connect(func(value: Vector2): player.mobile_move = value)
+    add_child(stick)
 
 func _process(delta):
     radar_timer += delta
