@@ -14,9 +14,9 @@ class_name SangramPlayer
 const STAND_HEIGHT := 1.8
 const CROUCH_HEIGHT := 1.2
 const PRONE_HEIGHT := 0.90
-const STAND_CAMERA := Vector3(0.0, 1.0, 5.5)
-const CROUCH_CAMERA := Vector3(0.0, 0.72, 4.8)
-const PRONE_CAMERA := Vector3(0.0, 0.42, 3.8)
+const STAND_CAMERA := Vector3(0.0, 1.0, 4.2)
+const CROUCH_CAMERA := Vector3(0.0, 0.72, 3.8)
+const PRONE_CAMERA := Vector3(0.0, 0.42, 3.2)
 const STAND_FOV := 75.0
 const ADS_FOV := 55.0
 
@@ -100,6 +100,7 @@ func _build_player_visual() -> void:
         if model_scene:
             var model := model_scene.instantiate() as Node3D
             model.rotation.y = PI
+            model.scale = Vector3(2.0, 2.0, 2.0)
             visual_root.add_child(model)
             model.visible = true
             _set_model_meshes_visible(model)
