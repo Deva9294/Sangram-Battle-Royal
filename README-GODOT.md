@@ -7,7 +7,9 @@ Godot 4.3 Android migration track. Original Unity project and main branch remain
 - Operator preview has basic gear/rifle silhouette and subtle idle motion
 - Deploy button opens the offline Malwa Frontier battlefield
 - Madhya Pradesh-inspired rural environment: village clusters, fields, lanes, stream crossing and tree belts
-- Third-person movement, hitscan shooting, ammo/reload and 24 simple chasing AI bots
+- Third-person movement with walk/sprint/crouch/prone, jump, camera ADS/FOV transitions, hitscan shooting, ammo/reload and 24 simple chasing AI bots
+- Mobile touch controls for movement, aim, sprint, crouch, prone, fire, jump and reload
+- Battlefield loot pickups: ammo, medkits and armor; armor absorbs part of incoming damage
 - Shrinking safe zone, health/ammo HUD and a live enemy radar minimap
 - Android touch buttons for movement, aim, fire, jump and reload
 
