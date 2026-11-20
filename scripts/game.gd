@@ -151,8 +151,14 @@ func _tree(pos: Vector3):
 func _spawn_player():
     player = CharacterBody3D.new()
     player.set_script(PlayerScript)
-    player.position = Vector3(0, 1.2, 0)
+    player.position = Vector3(-12.0, 92.0, 8.0)
+    player.parachuting = true
     add_child(player)
+    var canopy_script = load("res://scripts/parachute_visual.gd")
+    if canopy_script:
+        player.parachute_visual = Node3D.new()
+        player.parachute_visual.set_script(canopy_script)
+        player.add_child(player.parachute_visual)
 
 func _spawn_bots():
     for i in range(bot_count):
