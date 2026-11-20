@@ -37,6 +37,8 @@ var camera_pivot: Node3D
 var gun_ray: RayCast3D
 var player_collision: CollisionShape3D
 var player_visual: MeshInstance3D
+var visual_root: Node3D
+var muzzle_flash: OmniLight3D
 var hud
 var current_stance := "stand"
 var target_camera_position := STAND_CAMERA
@@ -52,8 +54,9 @@ func _ready() -> void:
     capsule.height = STAND_HEIGHT
     player_visual.mesh = capsule
     player_visual.position.y = STAND_HEIGHT * 0.5
-    player_visual.material_override = _mat(Color(0.12, 0.28, 0.68))
+    player_visual.visible = false
     add_child(player_visual)
+    _build_player_visual()
 
     player_collision = CollisionShape3D.new()
     var shape := CapsuleShape3D.new()
@@ -82,6 +85,49 @@ func _ready() -> void:
 
     if not OS.has_feature("mobile"):
         Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+func _build_player_visual() -> void:
+    visual_root = Node3D.new()
+    add_child(visual_root)
+    _soldier_part(Vector3(0, 1.05, 0), Vector3(0.62, 0.78, 0.36), Color(0.17, 0.25, 0.18))
+    _soldier_part(Vector3(0, 1.58, 0), Vector3(0.36, 0.42, 0.36), Color(0.62, 0.45, 0.34), true)
+    _soldier_part(Vector3(0, 1.82, 0), Vector3(0.48, 0.22, 0.46), Color(0.10, 0.15, 0.12))
+    _soldier_part(Vector3(0, 1.12, 0.20), Vector3(0.68, 0.56, 0.16), Color(0.08, 0.12, 0.10))
+    _soldier_part(Vector3(-0.39, 1.08, 0), Vector3(0.19, 0.62, 0.20), Color(0.17, 0.25, 0.18))
+    _soldier_part(Vector3(0.39, 1.08, 0), Vector3(0.19, 0.62, 0.20), Color(0.17, 0.25, 0.18))
+    _soldier_part(Vector3(-0.18, 0.39, 0), Vector3(0.23, 0.72, 0.25), Color(0.10, 0.13, 0.11))
+    _soldier_part(Vector3(0.18, 0.39, 0), Vector3(0.23, 0.72, 0.25), Color(0.10, 0.13, 0.11))
+    _soldier_part(Vector3(-0.18, 0.06, 0.08), Vector3(0.32, 0.16, 0.44), Color(0.045, 0.05, 0.045))
+    _soldier_part(Vector3(0.18, 0.06, 0.08), Vector3(0.32, 0.16, 0.44), Color(0.045, 0.05, 0.045))
+    _soldier_part(Vector3(0.35, 1.23, -0.43), Vector3(0.13, 0.13, 0.82), Color(0.045, 0.052, 0.048))
+    _soldier_part(Vector3(0.35, 1.23, -0.88), Vector3(0.085, 0.085, 0.36), Color(0.08, 0.09, 0.08))
+    _soldier_part(Vector3(0.35, 1.23, -0.08), Vector3(0.17, 0.22, 0.18), Color(0.075, 0.08, 0.075))
+    _soldier_part(Vector3(-0.2, 1.12, -0.12), Vector3(0.16, 0.22, 0.14), Color(0.62, 0.43, 0.18))
+    _soldier_part(Vector3(0.0, 1.12, -0.12), Vector3(0.16, 0.22, 0.14), Color(0.62, 0.43, 0.18))
+    muzzle_flash = OmniLight3D.new()
+    muzzle_flash.position = Vector3(0.35, 1.23, -1.12)
+    muzzle_flash.light_color = Color(1.0, 0.62, 0.18)
+    muzzle_flash.light_energy = 0.0
+    muzzle_flash.omni_range = 4.0
+    visual_root.add_child(muzzle_flash)
+
+func _soldier_part(pos: Vector3, size: Vector3, color: Color, sphere := false) -> void:
+    var mesh := MeshInstance3D.new()
+    if sphere:
+        var sphere_mesh := SphereMesh.new()
+        sphere_mesh.radius = size.x * 0.5
+        sphere_mesh.height = size.y
+        mesh.mesh = sphere_mesh
+    else:
+        var box := BoxMesh.new()
+        box.size = size
+        mesh.mesh = box
+    mesh.position = pos
+    var material := StandardMaterial3D.new()
+    material.albedo_color = color
+    material.roughness = 0.82
+    mesh.material_override = material
+    visual_root.add_child(mesh)
 
 func _unhandled_input(event: InputEvent) -> void:
     if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
@@ -217,11 +263,17 @@ func shoot() -> void:
     fire_cooldown = fire_interval
     recoil_pitch = -0.012 if Input.is_action_pressed("aim") else -0.02
     recoil_yaw = randf_range(-0.004, 0.004)
+    if muzzle_flash:
+        muzzle_flash.light_energy = 2.2
+        get_tree().create_timer(0.055).timeout.connect(func():
+            if is_instance_valid(muzzle_flash):
+                muzzle_flash.light_energy = 0.0
+        )
     gun_ray.force_raycast_update()
     if gun_ray.is_colliding():
         var target = gun_ray.get_collider()
         if target and target.has_method("take_damage"):
-            target.call("take_damage", bullet_damage)
+            target.call("take_damage", bullet_damage, self)
 
 func reload() -> void:
     if reload_time <= 0.0 and ammo < 30 and reserve_ammo > 0:
