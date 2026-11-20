@@ -2,6 +2,7 @@ extends Node3D
 
 const PlayerScript = preload("res://scripts/player.gd")
 const BotScript = preload("res://scripts/bot.gd")
+const LootScript = preload("res://scripts/loot_pickup.gd")
 var player
 var hud
 var bot_count := 24
@@ -21,6 +22,7 @@ func _ready():
     _build_world()
     _spawn_player()
     _spawn_bots()
+    _spawn_loot()
     _build_hud()
     match_started = true
 
@@ -160,6 +162,27 @@ func _spawn_bots():
         bot.target = player
         bot.add_to_group("bots")
         add_child(bot)
+
+func _spawn_loot() -> void:
+    for i in range(30):
+        var pickup := Area3D.new()
+        pickup.set_script(LootScript)
+        var roll := i % 3
+        if roll == 0:
+            pickup.loot_type = "ammo"
+            pickup.amount = 45
+        elif roll == 1:
+            pickup.loot_type = "medkit"
+            pickup.amount = 1
+        else:
+            pickup.loot_type = "armor"
+            pickup.amount = 30
+        var x := randf_range(-86.0, 86.0)
+        var z := randf_range(-86.0, 86.0)
+        if Vector2(x, z).length() < 16.0:
+            x += 24.0
+        pickup.position = Vector3(x, 0.0, z)
+        add_child(pickup)
 
 func _build_hud():
     var layer = CanvasLayer.new()
