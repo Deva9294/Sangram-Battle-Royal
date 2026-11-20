@@ -42,6 +42,8 @@ func _ready():
     _button("SPRINT", Vector2(-278, -215), Vector2(86, 46), "sprint")
     _button("CROUCH", Vector2(-180, -225), Vector2(86, 46), "crouch")
     _button("PRONE", Vector2(-82, -225), Vector2(76, 46), "prone")
+    _button("PICKUP", Vector2(-278, -280), Vector2(86, 46), "interact")
+    _button("MEDKIT", Vector2(-180, -280), Vector2(86, 46), "use_medkit")
     _button("▲", Vector2(92, -194), Vector2(66, 60), "forward")
     _button("▼", Vector2(92, -58), Vector2(66, 60), "back")
     _button("◀", Vector2(24, -126), Vector2(66, 60), "left")
@@ -114,6 +116,10 @@ func _button(caption: String, offset: Vector2, size: Vector2, action: String):
         b.button_up.connect(func(): _set_mobile_action("sprint", false))
     elif action == "reload":
         b.pressed.connect(func(): player.reload())
+    elif action == "interact":
+        b.pressed.connect(func(): player.interact())
+    elif action == "use_medkit":
+        b.pressed.connect(func(): player.use_medkit())
     elif action == "jump":
         b.pressed.connect(func(): player.velocity.y = 7.0)
     else:
@@ -137,7 +143,7 @@ func _move(action: String, pressed: bool):
 func update_stats(p, remaining: int, zone: float, time: float, kills: int, zone_countdown: float):
     if not is_instance_valid(p): return
     var zone_text = "ZONE IN %02d" % int(ceil(zone_countdown)) if zone_countdown > 0.0 else "ZONE %dm" % int(zone)
-    stats.text = "SANGRAM  |  HP %d  |  AMMO %d/%d  |  ALIVE %d  |  KILLS %d  |  %s  |  %02d:%02d" % [int(p.health), p.ammo, p.reserve_ammo, remaining + 1, kills, zone_text, int(time) / 60, int(time) % 60]
+    stats.text = "SANGRAM  |  HP %d  |  ARM %d  |  KIT %d  |  AMMO %d/%d  |  ALIVE %d  |  KILLS %d  |  %s  |  %02d:%02d" % [int(p.health), int(p.armor), p.medkits, p.ammo, p.reserve_ammo, remaining + 1, kills, zone_text, int(time) / 60, int(time) % 60]
 
 func show_message(message: String):
     message_label.text = message
