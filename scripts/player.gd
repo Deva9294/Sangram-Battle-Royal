@@ -21,6 +21,8 @@ const STAND_FOV := 75.0
 const ADS_FOV := 55.0
 
 var health := 100.0
+var armor := 0.0
+var medkits := 0
 var ammo := 30
 var reserve_ammo := 120
 var fire_cooldown := 0.0
@@ -120,6 +122,10 @@ func _physics_process(delta: float) -> void:
 
     if Input.is_action_just_pressed("reload"):
         reload()
+    if Input.is_action_just_pressed("interact"):
+        interact()
+    if Input.is_action_just_pressed("use_medkit"):
+        use_medkit()
     if Input.is_action_pressed("fire") or mobile_fire:
         shoot()
 
@@ -224,7 +230,9 @@ func reload() -> void:
 func take_damage(amount: float) -> void:
     if eliminated:
         return
-    health = maxf(0.0, health - amount)
+    var absorbed := minf(armor, amount * 0.65)
+    armor -= absorbed
+    health = maxf(0.0, health - (amount - absorbed))
     if health <= 0.0:
         eliminated = true
         if hud:
@@ -232,6 +240,48 @@ func take_damage(amount: float) -> void:
 
 func heal(amount: float) -> void:
     health = minf(100.0, health + amount)
+
+func add_loot(loot_type: String, amount: int) -> void:
+    match loot_type:
+        "ammo":
+            var before := reserve_ammo
+            reserve_ammo = mini(240, reserve_ammo + amount)
+            if hud:
+                hud.show_message("AMMO +%d" % (reserve_ammo - before))
+        "medkit":
+            medkits += 1
+            if hud:
+                hud.show_message("MEDKIT COLLECTED")
+        "armor":
+            var before := armor
+            armor = minf(100.0, armor + float(amount))
+            if hud:
+                hud.show_message("ARMOR +%d" % int(armor - before))
+
+func interact() -> void:
+    var nearest: Node = null
+    var nearest_distance := 3.0
+    for pickup in get_tree().get_nodes_in_group("loot"):
+        if not is_instance_valid(pickup):
+            continue
+        var distance := global_position.distance_to(pickup.global_position)
+        if distance < nearest_distance:
+            nearest_distance = distance
+            nearest = pickup
+    if nearest and nearest.has_method("collect"):
+        nearest.call("collect", self)
+    elif hud:
+        hud.show_message("NO LOOT NEARBY")
+
+func use_medkit() -> void:
+    if medkits <= 0 or health >= 100.0:
+        if hud:
+            hud.show_message("NO MEDKIT OR HEALTH FULL")
+        return
+    medkits -= 1
+    heal(45.0)
+    if hud:
+        hud.show_message("MEDKIT USED  +45 HP")
 
 func _mat(color: Color) -> StandardMaterial3D:
     var material := StandardMaterial3D.new()
