@@ -174,3 +174,6 @@ func bot_eliminated(attacker = null):
     if attacker == player:
         kills += 1
         if hud: hud.show_message("ENEMY ELIMINATED  +1")
+
+func player_eliminated():
+    game_over = true
