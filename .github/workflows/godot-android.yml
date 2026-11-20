@@ -30,6 +30,9 @@ jobs:
             cp -a /root/.local/share/godot/export_templates/4.3.stable "$HOME/.local/share/godot/export_templates/"
           fi
 
+      - name: Download CC0 soldier models for offline game
+        run: bash tools/download_cc0_assets.sh
+
       - name: Validate project and import assets
         run: godot --headless --editor --path . --quit
 
