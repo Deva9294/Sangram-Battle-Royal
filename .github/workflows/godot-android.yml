@@ -8,6 +8,7 @@ on:
       - 'project.godot'
       - 'scenes/**'
       - 'scripts/**'
+      - 'tools/**'
       - 'export_presets.cfg'
       - '.github/workflows/godot-android.yml'
 
