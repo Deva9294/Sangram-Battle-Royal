@@ -47,7 +47,9 @@ var target_camera_position := STAND_CAMERA
 var target_fov := STAND_FOV
 var recoil_pitch := 0.0
 var recoil_yaw := 0.0
-var spawn_protection := 12.0
+var spawn_protection := 18.0
+var parachuting := false
+var parachute_visual: Node3D
 
 func _ready() -> void:
     add_to_group("player")
@@ -243,7 +245,9 @@ func _update_movement(delta: float) -> void:
     var direction := (transform.basis * Vector3(input_vector.x, 0.0, input_vector.y)).normalized()
 
     var speed := move_speed
-    if current_stance == "prone":
+    if parachuting:
+        speed = 4.2
+    elif current_stance == "prone":
         speed = prone_speed
     elif current_stance == "crouch":
         speed = crouch_speed
@@ -253,12 +257,20 @@ func _update_movement(delta: float) -> void:
     velocity.x = direction.x * speed
     velocity.z = direction.z * speed
 
-    if not is_on_floor():
+    if parachuting:
+        velocity.y = -5.2
+    elif not is_on_floor():
         velocity.y -= gravity_strength * delta
     elif Input.is_action_just_pressed("jump") and current_stance == "stand":
         velocity.y = jump_velocity
 
     move_and_slide()
+    if parachuting and is_on_floor():
+        parachuting = false
+        if parachute_visual and is_instance_valid(parachute_visual):
+            parachute_visual.queue_free()
+        if hud:
+            hud.show_message("LANDING COMPLETE  •  FIND WEAPONS")
 
 func _update_stance(delta: float) -> void:
     var desired := "stand"
