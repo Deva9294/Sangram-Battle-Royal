@@ -13,6 +13,7 @@ var matchmaking_active := false
 var matchmaking_remaining := 12.0
 var matchmaking_label: Label
 var matchmaking_panel: PanelContainer
+var matchmaking_layer: CanvasLayer
 
 func _ready():
     _build_lobby_world()
@@ -241,6 +242,9 @@ func _deploy():
         return
     matchmaking_active = true
     matchmaking_remaining = 12.0
+    matchmaking_layer = CanvasLayer.new()
+    matchmaking_layer.layer = 50
+    get_tree().current_scene.add_child(matchmaking_layer)
     matchmaking_panel = PanelContainer.new()
     matchmaking_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
     matchmaking_panel.position = Vector2(-230, -105)
@@ -271,7 +275,7 @@ func _deploy():
     cancel.custom_minimum_size = Vector2(0, 42)
     cancel.pressed.connect(func():
         matchmaking_active = false
-        matchmaking_panel.queue_free()
+        matchmaking_layer.queue_free()
     )
     box.add_child(cancel)
-    get_tree().current_scene.add_child(matchmaking_panel)
+    matchmaking_layer.add_child(matchmaking_panel)
