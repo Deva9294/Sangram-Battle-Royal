@@ -39,6 +39,8 @@ var player_collision: CollisionShape3D
 var player_visual: MeshInstance3D
 var visual_root: Node3D
 var muzzle_flash: OmniLight3D
+var visual_animation: AnimationPlayer
+var visual_animation_name := ""
 var hud
 var current_stance := "stand"
 var target_camera_position := STAND_CAMERA
@@ -89,6 +91,26 @@ func _ready() -> void:
 func _build_player_visual() -> void:
     visual_root = Node3D.new()
     add_child(visual_root)
+    var model_path := "res://assets/characters/ReconScout.glb"
+    if ResourceLoader.exists(model_path):
+        var model_scene := load(model_path) as PackedScene
+        if model_scene:
+            var model := model_scene.instantiate()
+            model.rotation.y = PI
+            visual_root.add_child(model)
+            visual_animation = _find_animation_player(model)
+            _play_visual_animation("Idle")
+    if visual_animation == null:
+        _build_procedural_soldier()
+
+    muzzle_flash = OmniLight3D.new()
+    muzzle_flash.position = Vector3(0.35, 1.23, -1.12)
+    muzzle_flash.light_color = Color(1.0, 0.62, 0.18)
+    muzzle_flash.light_energy = 0.0
+    muzzle_flash.omni_range = 4.0
+    visual_root.add_child(muzzle_flash)
+
+func _build_procedural_soldier() -> void:
     _soldier_part(Vector3(0, 1.05, 0), Vector3(0.62, 0.78, 0.36), Color(0.17, 0.25, 0.18))
     _soldier_part(Vector3(0, 1.58, 0), Vector3(0.36, 0.42, 0.36), Color(0.62, 0.45, 0.34), true)
     _soldier_part(Vector3(0, 1.82, 0), Vector3(0.48, 0.22, 0.46), Color(0.10, 0.15, 0.12))
@@ -104,12 +126,29 @@ func _build_player_visual() -> void:
     _soldier_part(Vector3(0.35, 1.23, -0.08), Vector3(0.17, 0.22, 0.18), Color(0.075, 0.08, 0.075))
     _soldier_part(Vector3(-0.2, 1.12, -0.12), Vector3(0.16, 0.22, 0.14), Color(0.62, 0.43, 0.18))
     _soldier_part(Vector3(0.0, 1.12, -0.12), Vector3(0.16, 0.22, 0.14), Color(0.62, 0.43, 0.18))
-    muzzle_flash = OmniLight3D.new()
-    muzzle_flash.position = Vector3(0.35, 1.23, -1.12)
-    muzzle_flash.light_color = Color(1.0, 0.62, 0.18)
-    muzzle_flash.light_energy = 0.0
-    muzzle_flash.omni_range = 4.0
-    visual_root.add_child(muzzle_flash)
+
+func _find_animation_player(node: Node) -> AnimationPlayer:
+    if node is AnimationPlayer:
+        return node as AnimationPlayer
+    for child in node.get_children():
+        var found := _find_animation_player(child)
+        if found:
+            return found
+    return null
+
+func _play_visual_animation(animation_name: String) -> void:
+    if visual_animation and visual_animation.has_animation(animation_name) and visual_animation_name != animation_name:
+        visual_animation.play(animation_name)
+        visual_animation_name = animation_name
+
+func _update_visual_animation() -> void:
+    if visual_animation == null:
+        return
+    var horizontal_speed := Vector2(velocity.x, velocity.z).length()
+    var next_animation := "Idle"
+    if horizontal_speed > 0.2:
+        next_animation = "Run" if Input.is_action_pressed("sprint") else "Walk"
+    _play_visual_animation(next_animation)
 
 func _soldier_part(pos: Vector3, size: Vector3, color: Color, sphere := false) -> void:
     var mesh := MeshInstance3D.new()
@@ -166,6 +205,7 @@ func _physics_process(delta: float) -> void:
     _update_stance(delta)
     _update_camera(delta)
     _update_movement(delta)
+    _update_visual_animation()
 
     if Input.is_action_just_pressed("reload"):
         reload()
