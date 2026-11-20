@@ -95,7 +95,7 @@ func _build_player_visual() -> void:
     if ResourceLoader.exists(model_path):
         var model_scene := load(model_path) as PackedScene
         if model_scene:
-            var model := model_scene.instantiate()
+            var model := model_scene.instantiate() as Node3D
             model.rotation.y = PI
             visual_root.add_child(model)
             visual_animation = _find_animation_player(model)
