@@ -3,10 +3,10 @@ class_name SangramBot
 
 @export var max_health := 100.0
 @export var move_speed := 3.2
-@export var detection_range := 48.0
-@export var weapon_range := 34.0
-@export var fire_interval := 1.15
-@export var damage_per_shot := 8.0
+@export var detection_range := 34.0
+@export var weapon_range := 22.0
+@export var fire_interval := 2.0
+@export var damage_per_shot := 3.5
 
 var health := 100.0
 var target: Node3D
@@ -37,8 +37,13 @@ func _build_soldier() -> void:
             var model := model_scene.instantiate() as Node3D
             model.rotation.y = PI
             visual_root.add_child(model)
+            model.visible = true
+            _set_model_meshes_visible(model)
             visual_animation = _find_animation_player(model)
             _play_visual_animation("Idle")
+            if not _contains_renderable_mesh(model):
+                model.queue_free()
+                visual_animation = null
     if visual_animation == null:
         _build_procedural_soldier()
 
@@ -60,6 +65,20 @@ func _build_procedural_soldier() -> void:
     _part(Vector3(-0.18, 0.39, 0), Vector3(0.23, 0.72, 0.25), Color(0.12, 0.15, 0.13))
     _part(Vector3(0.18, 0.39, 0), Vector3(0.23, 0.72, 0.25), Color(0.12, 0.15, 0.13))
     _part(Vector3(0.34, 1.16, -0.43), Vector3(0.11, 0.12, 0.78), Color(0.055, 0.065, 0.06))
+
+func _set_model_meshes_visible(node: Node) -> void:
+    if node is VisualInstance3D:
+        node.visible = true
+    for child in node.get_children():
+        _set_model_meshes_visible(child)
+
+func _contains_renderable_mesh(node: Node) -> bool:
+    if node is MeshInstance3D and node.mesh != null:
+        return true
+    for child in node.get_children():
+        if _contains_renderable_mesh(child):
+            return true
+    return false
 
 func _find_animation_player(node: Node) -> AnimationPlayer:
     if node is AnimationPlayer:
