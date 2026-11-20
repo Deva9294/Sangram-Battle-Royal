@@ -38,12 +38,16 @@ func _ready():
     _button("FIRE", Vector2(-150, -158), Vector2(118, 82), "fire")
     _button("RELOAD", Vector2(-278, -95), Vector2(110, 56), "reload")
     _button("JUMP", Vector2(-150, -66), Vector2(100, 56), "jump")
+    _button("AIM", Vector2(-278, -160), Vector2(86, 46), "aim")
+    _button("SPRINT", Vector2(-278, -215), Vector2(86, 46), "sprint")
+    _button("CROUCH", Vector2(-180, -225), Vector2(86, 46), "crouch")
+    _button("PRONE", Vector2(-82, -225), Vector2(76, 46), "prone")
     _button("▲", Vector2(92, -194), Vector2(66, 60), "forward")
     _button("▼", Vector2(92, -58), Vector2(66, 60), "back")
     _button("◀", Vector2(24, -126), Vector2(66, 60), "left")
     _button("▶", Vector2(160, -126), Vector2(66, 60), "right")
     var hint = Label.new()
-    hint.text = "WASD MOVE  •  MOUSE AIM  •  CLICK FIRE  •  R RELOAD  •  SHIFT SPRINT"
+    hint.text = "WASD MOVE  •  AIM  •  SPRINT  •  CROUCH  •  PRONE  •  FIRE"
     hint.position = Vector2(22, 62)
     hint.add_theme_font_size_override("font_size", 13)
     hint.add_theme_color_override("font_color", Color(1,1,1,0.9))
@@ -102,6 +106,12 @@ func _button(caption: String, offset: Vector2, size: Vector2, action: String):
     if action == "fire":
         b.button_down.connect(func(): player.mobile_fire = true)
         b.button_up.connect(func(): player.mobile_fire = false)
+    elif action in ["aim", "crouch", "prone"]:
+        b.toggle_mode = true
+        b.toggled.connect(func(enabled: bool): _set_mobile_action(action, enabled))
+    elif action == "sprint":
+        b.button_down.connect(func(): _set_mobile_action("sprint", true))
+        b.button_up.connect(func(): _set_mobile_action("sprint", false))
     elif action == "reload":
         b.pressed.connect(func(): player.reload())
     elif action == "jump":
@@ -109,6 +119,12 @@ func _button(caption: String, offset: Vector2, size: Vector2, action: String):
     else:
         b.button_down.connect(func(): _move(action, true))
         b.button_up.connect(func(): _move(action, false))
+
+func _set_mobile_action(action: String, enabled: bool) -> void:
+    if enabled:
+        Input.action_press(action)
+    else:
+        Input.action_release(action)
 
 func _move(action: String, pressed: bool):
     match action:
