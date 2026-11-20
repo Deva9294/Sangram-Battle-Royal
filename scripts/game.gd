@@ -9,31 +9,43 @@ var elapsed := 0.0
 var safe_radius := 95.0
 var game_over := false
 var safe_ring: MeshInstance3D
+var kills := 0
+var match_started := false
+const ZONE_WAIT := 20.0
+const ZONE_SHRINK_RATE := 0.42
+const ZONE_MIN_RADIUS := 14.0
 
 func _ready():
+    randomize()
     add_to_group("game_manager")
     _build_world()
     _spawn_player()
     _spawn_bots()
     _build_hud()
+    match_started = true
 
 func _process(delta):
-    if game_over: return
+    if game_over or not match_started: return
     elapsed += delta
-    safe_radius = maxf(14.0, 95.0 - elapsed * 0.23)
+    var shrink_elapsed = maxf(0.0, elapsed - ZONE_WAIT)
+    safe_radius = maxf(ZONE_MIN_RADIUS, 95.0 - shrink_elapsed * ZONE_SHRINK_RATE)
     if safe_ring:
-        safe_ring.scale = Vector3(safe_radius / 95.0, 1, safe_radius / 95.0)
-    if player and is_instance_valid(player):
-        if Vector2(player.global_position.x, player.global_position.z).length() > safe_radius:
-            player.take_damage(5.0 * delta)
-        if player.eliminated:
-            game_over = true
-            return
+        safe_ring.scale = Vector3(safe_radius / 95.0, 1.0, safe_radius / 95.0)
+    if player and is_instance_valid(player) and not player.eliminated:
+        var player_distance = Vector2(player.global_position.x, player.global_position.z).length()
+        if player_distance > safe_radius:
+            player.take_damage(5.5 * delta)
+    for enemy in get_tree().get_nodes_in_group("bots"):
+        if not is_instance_valid(enemy) or not enemy.alive: continue
+        var enemy_distance = Vector2(enemy.global_position.x, enemy.global_position.z).length()
+        if enemy_distance > safe_radius:
+            enemy.take_damage(4.0 * delta, self)
     var remaining = get_tree().get_nodes_in_group("bots").size()
-    if hud: hud.update_stats(player, remaining, safe_radius, elapsed)
+    var zone_countdown = maxf(0.0, ZONE_WAIT - elapsed)
+    if hud: hud.update_stats(player, remaining, safe_radius, elapsed, kills, zone_countdown)
     if remaining == 0 and not game_over:
         game_over = true
-        hud.show_result(true)
+        if hud: hud.show_result(true, kills)
 
 func _build_world():
     var env = WorldEnvironment.new()
@@ -51,15 +63,12 @@ func _build_world():
     sun.shadow_enabled = true
     add_child(sun)
 
-    # Central Madhya Pradesh-inspired rural battleground: soil, crop plots,
-    # village lanes, a seasonal stream, bridge, fields and tree belts.
     _box(Vector3(0, -0.6, 0), Vector3(210, 1, 210), Color(0.27, 0.34, 0.16), true)
     _box(Vector3(0, -0.22, -38), Vector3(205, 0.12, 10), Color(0.42, 0.34, 0.22), false)
     _box(Vector3(-34, -0.18, 0), Vector3(9, 0.15, 205), Color(0.39, 0.32, 0.22), false)
-    # Stream through the eastern side and a simple crossing.
     _box(Vector3(63, -0.25, 0), Vector3(13, 0.22, 205), Color(0.10, 0.34, 0.43), false)
     _box(Vector3(63, 0.05, 22), Vector3(19, 0.55, 8), Color(0.48, 0.43, 0.34), false)
-    # Mustard/soybean field plots with crop rows.
+
     for plot in range(8):
         var px = -82.0 + float(plot % 4) * 36.0
         var pz = -78.0 + float(plot / 4) * 118.0
@@ -67,7 +76,6 @@ func _build_world():
         for row in range(9):
             _box(Vector3(px - 10.0 + row * 2.5, 0.06, pz), Vector3(0.12, 0.12, 38), Color(0.53, 0.46, 0.18), false)
 
-    # Three village clusters with houses, courtyard walls and tin roofs.
     for cluster in range(3):
         var cx = [-48.0, 8.0, 35.0][cluster]
         var cz = [-12.0, 42.0, -58.0][cluster]
@@ -95,10 +103,11 @@ func _build_world():
     ring.ring_segments = 96
     safe_ring.mesh = ring
     safe_ring.position.y = 0.08
-    safe_ring.scale = Vector3.ONE
     var ring_mat = StandardMaterial3D.new()
     ring_mat.albedo_color = Color(0.1, 0.85, 1.0, 0.8)
     ring_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+    ring_mat.emission_enabled = true
+    ring_mat.emission = Color(0.04, 0.42, 0.7)
     safe_ring.material_override = ring_mat
     add_child(safe_ring)
 
@@ -111,6 +120,7 @@ func _box(pos: Vector3, size: Vector3, color: Color, solid: bool):
     mesh.mesh = box
     var mat = StandardMaterial3D.new()
     mat.albedo_color = color
+    mat.roughness = 0.92
     mesh.material_override = mat
     root.add_child(mesh)
     if solid:
@@ -143,7 +153,7 @@ func _spawn_player():
 func _spawn_bots():
     for i in range(bot_count):
         var angle = TAU * float(i) / bot_count
-        var radius = randf_range(24, 78)
+        var radius = randf_range(32, 82)
         var bot = CharacterBody3D.new()
         bot.set_script(BotScript)
         bot.position = Vector3(cos(angle) * radius, 1.0, sin(angle) * radius)
@@ -160,5 +170,7 @@ func _build_hud():
     hud.player = player
     player.hud = hud
 
-func bot_eliminated():
-    pass
+func bot_eliminated(attacker = null):
+    if attacker == player:
+        kills += 1
+        if hud: hud.show_message("ENEMY ELIMINATED  +1")
