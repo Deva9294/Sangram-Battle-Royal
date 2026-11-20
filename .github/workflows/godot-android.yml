@@ -33,6 +33,12 @@ jobs:
       - name: Validate project and import assets
         run: godot --headless --editor --path . --quit
 
+      - name: Smoke test deployment lobby at runtime
+        run: godot --headless --path . --quit-after 4
+
+      - name: Smoke test battle scene at runtime
+        run: godot --headless --path . res://scenes/game.tscn --quit-after 8
+
       - name: Configure Android SDK and debug signing
         run: |
           SDK_PATH="${ANDROID_HOME:-${ANDROID_SDK_ROOT}}"
