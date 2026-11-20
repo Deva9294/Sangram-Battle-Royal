@@ -47,6 +47,7 @@ var target_camera_position := STAND_CAMERA
 var target_fov := STAND_FOV
 var recoil_pitch := 0.0
 var recoil_yaw := 0.0
+var spawn_protection := 12.0
 
 func _ready() -> void:
     add_to_group("player")
@@ -98,8 +99,13 @@ func _build_player_visual() -> void:
             var model := model_scene.instantiate() as Node3D
             model.rotation.y = PI
             visual_root.add_child(model)
+            model.visible = true
+            _set_model_meshes_visible(model)
             visual_animation = _find_animation_player(model)
             _play_visual_animation("Idle")
+            if not _contains_renderable_mesh(model):
+                model.queue_free()
+                visual_animation = null
     if visual_animation == null:
         _build_procedural_soldier()
 
@@ -126,6 +132,20 @@ func _build_procedural_soldier() -> void:
     _soldier_part(Vector3(0.35, 1.23, -0.08), Vector3(0.17, 0.22, 0.18), Color(0.075, 0.08, 0.075))
     _soldier_part(Vector3(-0.2, 1.12, -0.12), Vector3(0.16, 0.22, 0.14), Color(0.62, 0.43, 0.18))
     _soldier_part(Vector3(0.0, 1.12, -0.12), Vector3(0.16, 0.22, 0.14), Color(0.62, 0.43, 0.18))
+
+func _set_model_meshes_visible(node: Node) -> void:
+    if node is VisualInstance3D:
+        node.visible = true
+    for child in node.get_children():
+        _set_model_meshes_visible(child)
+
+func _contains_renderable_mesh(node: Node) -> bool:
+    if node is MeshInstance3D and node.mesh != null:
+        return true
+    for child in node.get_children():
+        if _contains_renderable_mesh(child):
+            return true
+    return false
 
 func _find_animation_player(node: Node) -> AnimationPlayer:
     if node is AnimationPlayer:
@@ -200,6 +220,7 @@ func _physics_process(delta: float) -> void:
     if eliminated:
         return
 
+    spawn_protection = maxf(0.0, spawn_protection - delta)
     fire_cooldown = maxf(0.0, fire_cooldown - delta)
     _update_reload(delta)
     _update_stance(delta)
@@ -321,7 +342,7 @@ func reload() -> void:
         reload_time = 1.6
 
 func take_damage(amount: float) -> void:
-    if eliminated:
+    if eliminated or spawn_protection > 0.0:
         return
     var absorbed := minf(armor, amount * 0.65)
     armor -= absorbed
