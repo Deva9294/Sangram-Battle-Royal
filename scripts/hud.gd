@@ -17,6 +17,7 @@ var mobile_back := false
 
 func _ready():
     set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    mouse_filter = Control.MOUSE_FILTER_IGNORE
     stats = Label.new()
     stats.position = Vector2(22, 18)
     stats.add_theme_font_size_override("font_size", 20)
