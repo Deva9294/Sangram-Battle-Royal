@@ -326,8 +326,11 @@ func take_damage(amount: float) -> void:
     var absorbed := minf(armor, amount * 0.65)
     armor -= absorbed
     health = maxf(0.0, health - (amount - absorbed))
+    if hud:
+        hud.show_damage()
     if health <= 0.0:
         eliminated = true
+        _play_visual_animation("Death")
         if hud:
             hud.show_result(false)
         get_tree().call_group("game_manager", "player_eliminated")
