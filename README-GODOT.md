@@ -7,18 +7,20 @@ Godot 4.3 Android migration track. Original Unity project and main branch remain
 - Operator preview has basic gear/rifle silhouette and subtle idle motion
 - Deploy button opens the offline Malwa Frontier battlefield
 - Madhya Pradesh-inspired rural environment: village clusters, fields, lanes, stream crossing and tree belts
-- Third-person movement with walk/sprint/crouch/prone, jump, camera ADS/FOV transitions, hitscan shooting, ammo/reload and 24 simple chasing AI bots
-- Mobile touch controls for movement, aim, sprint, crouch, prone, fire, jump and reload
-- Battlefield loot pickups: ammo, medkits and armor; armor absorbs part of incoming damage
+- Third-person player controller with walk/sprint/crouch/prone, jump, camera look, ADS/FOV transitions, hitscan rifle fire, recoil and reload
+- Procedural soldier silhouettes with rifle models and muzzle flash feedback
+- 24 armed AI opponents that pursue, check line of sight and fire at the player
+- Mobile analog movement joystick plus aim, sprint, crouch, prone, fire, jump and reload touch controls
+- Battlefield pickups: ammo, medkits and armor; armor absorbs part of incoming damage, medkits restore health
 - Shrinking safe zone, health/ammo HUD and a live enemy radar minimap
-- Android touch buttons for movement, aim, fire, jump and reload
+- Android touch controls for movement, aim, fire, jump, reload, pickup and medkit
 
 ## Controls
 - Desktop: WASD, mouse aim, left click fire, R reload, Space jump
 - Android: on-screen movement/fire/reload/jump controls; drag the right side to aim
 
 ## Important production gaps
-This is still an early offline prototype. The lobby character and world are procedural placeholder geometry, not photorealistic production assets. It does not yet include rigged character animation, high-resolution PBR texture packs, full terrain heightmap, loot/inventory, parachute, vehicles, online multiplayer, anti-cheat or real-device QA.
+This is an early offline gameplay prototype, not a finished photorealistic commercial game. Soldier visuals and much of the environment are still procedural meshes. Production work remains: rigged character animations, high-quality PBR assets, detailed terrain, proper weapon animations/audio, parachute, vehicles, navigation-mesh AI, performance profiling and real-device QA. Online multiplayer and anti-cheat are not implemented.
 
 The requested separate large-world data package (PCK/OBB-style delivery) is not wired yet. A Godot PCK sidecar needs an in-game download/load path; a legacy Android OBB file is not automatically consumed by this build.
 
