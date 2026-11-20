@@ -144,9 +144,10 @@ func _unhandled_input(event: InputEvent) -> void:
         elif not event.pressed and event.index == look_touch:
             look_touch = -1
     elif event is InputEventScreenDrag and event.index == look_touch:
-        var delta := event.position - look_last
-        _look(delta, 0.004)
-        look_last = event.position
+        var drag_event := event as InputEventScreenDrag
+        var look_delta: Vector2 = drag_event.position - look_last
+        _look(look_delta, 0.004)
+        look_last = drag_event.position
 
 func _look(delta: Vector2, sensitivity: float) -> void:
     rotate_y(-delta.x * sensitivity)
