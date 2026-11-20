@@ -8,7 +8,7 @@ Godot 4.3 Android migration track. Original Unity project and main branch remain
 - Deploy button opens the offline Malwa Frontier battlefield
 - Madhya Pradesh-inspired rural environment: village clusters, fields, lanes, stream crossing and tree belts
 - Third-person player controller with walk/sprint/crouch/prone, jump, camera look, ADS/FOV transitions, hitscan rifle fire, recoil and reload
-- Procedural soldier silhouettes with rifle models and muzzle flash feedback
+- Rigged, animated soldier models (Rifleman, Recon Scout, Army Sniper and Combat Medic) with Idle/Walk/Run/Death animations; procedural fallback if assets are not present
 - 24 armed AI opponents that pursue, check line of sight and fire at the player
 - Mobile analog movement joystick plus aim, sprint, crouch, prone, fire, jump and reload touch controls
 - Battlefield pickups: ammo, medkits and armor; armor absorbs part of incoming damage, medkits restore health
@@ -25,4 +25,4 @@ This is an early offline gameplay prototype, not a finished photorealistic comme
 The requested separate large-world data package (PCK/OBB-style delivery) is not wired yet. A Godot PCK sidecar needs an in-game download/load path; a legacy Android OBB file is not automatically consumed by this build.
 
 ## Build
-Use Godot 4.3+ with the Android export templates and the Android preset in `export_presets.cfg`. The CI workflow is configured for both `godot-migration` and `mp-lobby-upgrade`.
+Use Godot 4.3+ with the Android export templates and the Android preset in `export_presets.cfg`. Before opening the project locally, run `bash tools/download_cc0_assets.sh` once to fetch the CC0 GLB soldier models; they are then bundled into the APK for offline play. The CI workflow performs this step automatically and runs lobby plus 60-second battle-scene smoke tests before exporting.
