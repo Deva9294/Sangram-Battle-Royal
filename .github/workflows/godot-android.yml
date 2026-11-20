@@ -44,7 +44,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          godot --headless --path . --quit-after 8 res://scenes/game.tscn 2>&1 | tee /tmp/sangram-game.log
+          godot --headless --fixed-fps 60 --path . --quit-after 3600 res://scenes/game.tscn 2>&1 | tee /tmp/sangram-game.log
           if grep -E "SCRIPT ERROR|Parse Error" /tmp/sangram-game.log; then exit 1; fi
 
       - name: Configure Android SDK and debug signing
