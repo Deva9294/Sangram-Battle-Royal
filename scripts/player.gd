@@ -13,7 +13,7 @@ class_name SangramPlayer
 
 const STAND_HEIGHT := 1.8
 const CROUCH_HEIGHT := 1.2
-const PRONE_HEIGHT := 0.62
+const PRONE_HEIGHT := 0.90
 const STAND_CAMERA := Vector3(0.0, 1.0, 5.5)
 const CROUCH_CAMERA := Vector3(0.0, 0.72, 4.8)
 const PRONE_CAMERA := Vector3(0.0, 0.42, 3.8)
