@@ -34,10 +34,18 @@ jobs:
         run: godot --headless --editor --path . --quit
 
       - name: Smoke test deployment lobby at runtime
-        run: godot --headless --path . --quit-after 4
+        shell: bash
+        run: |
+          set -o pipefail
+          godot --headless --path . --quit-after 4 2>&1 | tee /tmp/sangram-lobby.log
+          if grep -E "SCRIPT ERROR|Parse Error" /tmp/sangram-lobby.log; then exit 1; fi
 
       - name: Smoke test battle scene at runtime
-        run: godot --headless --path . res://scenes/game.tscn --quit-after 8
+        shell: bash
+        run: |
+          set -o pipefail
+          godot --headless --path . --quit-after 8 res://scenes/game.tscn 2>&1 | tee /tmp/sangram-game.log
+          if grep -E "SCRIPT ERROR|Parse Error" /tmp/sangram-game.log; then exit 1; fi
 
       - name: Configure Android SDK and debug signing
         run: |
