@@ -1,5 +1,7 @@
 extends Node3D
 
+# SANGRAM Android ARM64 debug build validation.
+
 var selected_operator := 0
 var preview_root: Node3D
 var operator_names := ["VEER", "TARA", "RUDRA"]
