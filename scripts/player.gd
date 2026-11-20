@@ -237,6 +237,7 @@ func take_damage(amount: float) -> void:
         eliminated = true
         if hud:
             hud.show_result(false)
+        get_tree().call_group("game_manager", "player_eliminated")
 
 func heal(amount: float) -> void:
     health = minf(100.0, health + amount)
