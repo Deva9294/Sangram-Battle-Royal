@@ -38,3 +38,15 @@ Licence: CC0 1.0 Universal.
 
 Source: ambientCG Ground037, mirrored in https://github.com/petroulacl/fps-asset-kit
 Licence: CC0 1.0 Universal.
+
+
+## Field soldier characters (CC BY 4.0)
+
+The Godot Android build additionally downloads these rigged, animated GLB models from Vinish.Dev:
+- Infantry Soldier — Idle, Walk and Run
+- Paratrooper — Idle, Walk and Run
+- Desert Soldier — Idle, Walk and Run
+- Jungle Scout — Idle, Walk and Run
+
+Source: https://vinish.dev/free-3d-models/soldiers
+Licence: Creative Commons Attribution 4.0. Attribution: "Infantry Soldier" and related soldier models by vinish.dev, https://vinish.dev/free-3d-models/, CC BY 4.0. Models are modified/integrated into SANGRAM and are not affiliated with any real armed force.
