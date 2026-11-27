@@ -3,6 +3,7 @@ extends Node3D
 var elapsed := 0.0
 var zone_radius := 82.0
 var zone_shrink_rate := 0.10
+var building_asset_index := 0
 @onready var player: CharacterBody3D = $Player
 @onready var status: Label = $HUD/Status
 func _ready() -> void:
@@ -70,7 +71,8 @@ func _make_building(pos: Vector3, dims: Vector3, color: Color) -> void:
         "res://assets/environment/buildings/building-type-c.glb",
         "res://assets/environment/buildings/building-type-d.glb"
     ]
-    var model_path: String = building_paths[mini(get_child_count(), building_paths.size() - 1)]
+    var model_path: String = building_paths[building_asset_index % building_paths.size()]
+    building_asset_index += 1
     if ResourceLoader.exists(model_path):
         var packed := load(model_path) as PackedScene
         if packed:
