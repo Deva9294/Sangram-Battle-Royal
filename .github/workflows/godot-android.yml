@@ -28,13 +28,31 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v4
-        with:
-          packages: |
-            platform-tools
-            platforms;android-35
-            build-tools;35.0.0
+      - name: Configure Android SDK from runner image
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          echo "Using Android SDK at: $SDK_ROOT"
+          if [ ! -d "$SDK_ROOT" ]; then
+            echo "::error::Android SDK directory not found at $SDK_ROOT"
+            exit 1
+          fi
+          SDKMANAGER="$(command -v sdkmanager || true)"
+          if [ -z "$SDKMANAGER" ] && [ -x "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]; then
+            SDKMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          fi
+          if [ -z "$SDKMANAGER" ]; then
+            echo "::error::sdkmanager is missing from the GitHub runner image"
+            find "$SDK_ROOT/cmdline-tools" -maxdepth 3 -name sdkmanager -type f 2>/dev/null || true
+            exit 1
+          fi
+          echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "$(dirname "$SDKMANAGER")" >> "$GITHUB_PATH"
+          yes | "$SDKMANAGER" --sdk_root="$SDK_ROOT" --licenses >/dev/null || true
+          "$SDKMANAGER" --sdk_root="$SDK_ROOT" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          "$SDKMANAGER" --sdk_root="$SDK_ROOT" --list_installed
 
       - name: Install Godot 4.4.1 and matching export templates
         shell: bash
