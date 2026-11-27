@@ -25,6 +25,8 @@ var armor := 0.0
 var medkits := 0
 var ammo := 30
 var reserve_ammo := 120
+var has_weapon := true
+var weapon_name := "ASSAULT RIFLE"
 var fire_cooldown := 0.0
 var reload_time := 0.0
 var mobile_move := Vector2.ZERO
@@ -306,7 +308,7 @@ func _update_reload(delta: float) -> void:
         reserve_ammo -= take
 
 func shoot() -> void:
-    if fire_cooldown > 0.0 or reload_time > 0.0 or ammo <= 0:
+    if not has_weapon or fire_cooldown > 0.0 or reload_time > 0.0 or ammo <= 0:
         return
     ammo -= 1
     fire_cooldown = fire_interval
@@ -366,6 +368,18 @@ func add_loot(loot_type: String, amount: int) -> void:
                 hud.show_message("ARMOR +%d" % int(armor - before))
 
 func interact() -> void:
+    var nearest_weapon: Node = null
+    var weapon_distance := 3.2
+    for dropped in get_tree().get_nodes_in_group("dropped_weapons"):
+        if not is_instance_valid(dropped):
+            continue
+        var distance_to_weapon := global_position.distance_to(dropped.global_position)
+        if distance_to_weapon < weapon_distance:
+            weapon_distance = distance_to_weapon
+            nearest_weapon = dropped
+    if nearest_weapon and nearest_weapon.has_method("collect"):
+        nearest_weapon.call("collect", self)
+        return
     var nearest: Node = null
     var nearest_distance := 3.0
     for pickup in get_tree().get_nodes_in_group("loot"):
@@ -379,6 +393,27 @@ func interact() -> void:
         nearest.call("collect", self)
     elif hud:
         hud.show_message("NO LOOT NEARBY")
+
+func drop_weapon() -> void:
+    if not has_weapon:
+        if hud:
+            hud.show_message("NO WEAPON TO DROP")
+        return
+    var dropped := Area3D.new()
+    dropped.set_script(load("res://scripts/weapon_pickup.gd"))
+    dropped.position = global_position + (-global_transform.basis.z * 1.3) + Vector3.UP * 0.15
+    dropped.set("weapon_label", weapon_name)
+    get_parent().add_child(dropped)
+    has_weapon = false
+    if hud:
+        hud.show_message("WEAPON DROPPED — PICKUP TO RECOVER")
+
+func pickup_weapon(pickup: Node) -> void:
+    has_weapon = true
+    weapon_name = str(pickup.get("weapon_label"))
+    pickup.queue_free()
+    if hud:
+        hud.show_message("EQUIPPED: " + weapon_name)
 
 func use_medkit() -> void:
     if medkits <= 0 or health >= 100.0:
