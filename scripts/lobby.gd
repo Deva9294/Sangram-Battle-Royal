@@ -14,8 +14,6 @@ var matchmaking_remaining := 12.0
 var matchmaking_label: Label
 var matchmaking_panel: PanelContainer
 var matchmaking_layer: CanvasLayer
-var network_address: LineEdit
-var network_status: Label
 
 func _ready():
     _build_lobby_world()
@@ -30,7 +28,7 @@ func _process(delta):
     if matchmaking_active:
         matchmaking_remaining = maxf(0.0, matchmaking_remaining - delta)
         if matchmaking_label:
-            matchmaking_label.text = "SEARCHING FOR OPERATORS  •  OFFLINE BOT FILL\\nESTIMATED WAIT: 00:%02d\\nMATCH STARTING..." % int(ceil(matchmaking_remaining))
+            matchmaking_label.text = "LOADING MALWA BATTLEFIELD\\nBOT SQUAD DEPLOYMENT: 8\\nMATCH STARTING IN 00:%02d" % int(ceil(matchmaking_remaining))
         if matchmaking_remaining <= 0.0:
             matchmaking_active = false
             get_tree().change_scene_to_file("res://scenes/game.tscn")
@@ -108,7 +106,7 @@ func _build_interface():
     layer.add_child(subtitle)
     var panel = PanelContainer.new()
     panel.position = Vector2(28,180)
-    panel.size = Vector2(360,560)
+    panel.size = Vector2(360,470)
     var panel_style = StyleBoxFlat.new()
     panel_style.bg_color = Color(0.025,0.045,0.055,0.88)
     panel_style.border_color = Color(0.78,0.48,0.18,0.85)
@@ -157,40 +155,6 @@ func _build_interface():
     deploy.text = "▶   OFFLINE BOT BATTLE"
     deploy.pressed.connect(_deploy)
     layout.add_child(deploy)
-
-    var online_heading := Label.new()
-    online_heading.text = "ONLINE MULTIPLAYER • ENET HOST / JOIN"
-    online_heading.add_theme_font_size_override("font_size", 13)
-    online_heading.add_theme_color_override("font_color", Color(0.65,0.75,0.78))
-    layout.add_child(online_heading)
-
-    network_address = LineEdit.new()
-    network_address.placeholder_text = "Host IP address (e.g. 192.168.1.10)"
-    network_address.custom_minimum_size = Vector2(0, 40)
-    layout.add_child(network_address)
-
-    var online_row := HBoxContainer.new()
-    var host_button := Button.new()
-    host_button.text = "HOST MATCH"
-    host_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    host_button.custom_minimum_size.y = 44
-    host_button.pressed.connect(_host_online)
-    online_row.add_child(host_button)
-    var join_button := Button.new()
-    join_button.text = "JOIN MATCH"
-    join_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    join_button.custom_minimum_size.y = 44
-    join_button.pressed.connect(_join_online)
-    online_row.add_child(join_button)
-    layout.add_child(online_row)
-
-    network_status = Label.new()
-    network_status.text = "Offline mode ready • Online requires reachable host"
-    network_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-    network_status.add_theme_font_size_override("font_size", 12)
-    network_status.add_theme_color_override("font_color", Color(0.78,0.84,0.83))
-    layout.add_child(network_status)
-    NetworkSession.session_changed.connect(_on_network_status)
 
     var foot = Label.new()
     foot.text = "CHARACTER / TRAINING LOBBY  •  BUILD 0.2"
@@ -275,23 +239,6 @@ func _part(pos: Vector3, size: Vector3, color: Color, sphere := false):
     mesh.material_override = mat
     preview_root.add_child(mesh)
 
-func _host_online() -> void:
-    var result: Error = NetworkSession.host_game()
-    _on_network_status(NetworkSession.mode, NetworkSession.status)
-    if result == OK:
-        network_status.text += "\\nShare your public IP and open UDP port 2456 to let players join."
-
-func _join_online() -> void:
-    var address := network_address.text.strip_edges()
-    var result: Error = NetworkSession.join_game(address)
-    _on_network_status(NetworkSession.mode, NetworkSession.status)
-    if result == OK:
-        network_status.text += "\\nTransport connected when host accepts; gameplay sync is a separate milestone."
-
-func _on_network_status(mode: String, message: String) -> void:
-    if network_status and is_instance_valid(network_status):
-        network_status.text = ("ONLINE • " if mode == "online" else "OFFLINE • ") + message
-
 func _deploy():
     if matchmaking_active:
         return
@@ -315,7 +262,7 @@ func _deploy():
     box.add_theme_constant_override("separation", 14)
     matchmaking_panel.add_child(box)
     var title := Label.new()
-    title.text = "MATCHMAKING"
+    title.text = "OFFLINE BOT MATCH"
     title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     title.add_theme_font_size_override("font_size", 26)
     title.add_theme_color_override("font_color", Color(1.0, 0.68, 0.25))
