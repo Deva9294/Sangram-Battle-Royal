@@ -14,10 +14,10 @@ class_name SangramPlayer
 const STAND_HEIGHT := 1.8
 const CROUCH_HEIGHT := 1.2
 const PRONE_HEIGHT := 0.90
-const STAND_CAMERA := Vector3(0.0, 1.0, 4.2)
-const CROUCH_CAMERA := Vector3(0.0, 0.72, 3.8)
-const PRONE_CAMERA := Vector3(0.0, 0.42, 3.2)
-const STAND_FOV := 75.0
+const STAND_CAMERA := Vector3(0.0, 0.92, 3.25)
+const CROUCH_CAMERA := Vector3(0.0, 0.68, 3.0)
+const PRONE_CAMERA := Vector3(0.0, 0.38, 2.65)
+const STAND_FOV := 68.0
 const ADS_FOV := 55.0
 
 var health := 100.0
@@ -73,7 +73,7 @@ func _ready() -> void:
 
     camera_pivot = Node3D.new()
     camera_pivot.name = "CameraPivot"
-    camera_pivot.position.y = 1.55
+    camera_pivot.position.y = 1.48
     add_child(camera_pivot)
 
     camera = Camera3D.new()
@@ -100,8 +100,8 @@ func _build_player_visual() -> void:
         if model_scene:
             var model := model_scene.instantiate() as Node3D
             model.rotation.y = PI
-            model.scale = Vector3(2.0, 2.0, 2.0)
             visual_root.add_child(model)
+            _fit_character_model(model, 2.0)
             model.visible = true
             _set_model_meshes_visible(model)
             visual_animation = _find_animation_player(model)
@@ -118,6 +118,26 @@ func _build_player_visual() -> void:
     muzzle_flash.light_energy = 0.0
     muzzle_flash.omni_range = 4.0
     visual_root.add_child(muzzle_flash)
+
+func _fit_character_model(model: Node3D, target_height: float) -> void:
+    # Imported GLB assets use inconsistent units/origin; normalize to human scale.
+    var combined := AABB()
+    var found := false
+    var model_inverse := model.global_transform.affine_inverse()
+    var stack: Array[Node] = [model]
+    while not stack.is_empty():
+        var node: Node = stack.pop_back()
+        if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+            var mesh_instance := node as MeshInstance3D
+            var mesh_bounds: AABB = model_inverse * mesh_instance.global_transform * mesh_instance.get_aabb()
+            combined = mesh_bounds if not found else combined.merge(mesh_bounds)
+            found = true
+        for child in node.get_children():
+            stack.append(child)
+    if found and combined.size.y > 0.01:
+        var scale_factor := target_height / combined.size.y
+        model.scale *= scale_factor
+        model.position.y -= combined.position.y * scale_factor
 
 func _build_procedural_soldier() -> void:
     _soldier_part(Vector3(0, 1.05, 0), Vector3(0.62, 0.78, 0.36), Color(0.17, 0.25, 0.18))
