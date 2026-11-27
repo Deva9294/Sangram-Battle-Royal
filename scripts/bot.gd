@@ -25,10 +25,10 @@ func _build_soldier() -> void:
     visual_root = Node3D.new()
     add_child(visual_root)
     var model_paths := [
-        "res://assets/characters/Rifleman.glb",
-        "res://assets/characters/ReconScout.glb",
-        "res://assets/characters/ArmySniper.glb",
-        "res://assets/characters/CombatMedic.glb"
+        "res://assets/characters/InfantrySoldier.glb",
+        "res://assets/characters/Paratrooper.glb",
+        "res://assets/characters/DesertSoldier.glb",
+        "res://assets/characters/JungleScout.glb"
     ]
     var model_path: String = model_paths[randi_range(0, model_paths.size() - 1)]
     var imported_model_loaded := false
