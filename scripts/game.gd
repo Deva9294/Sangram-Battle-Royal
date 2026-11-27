@@ -77,7 +77,7 @@ func _build_world():
     sun.shadow_enabled = true
     add_child(sun)
 
-    _box(Vector3(0, -0.6, 0), Vector3(210, 1, 210), Color(0.27, 0.34, 0.16), true)
+    _build_textured_terrain()
     _box(Vector3(0, -0.22, -38), Vector3(205, 0.12, 12), Color(0.20, 0.22, 0.21), false)
     _box(Vector3(-34, -0.18, 0), Vector3(11, 0.15, 205), Color(0.20, 0.22, 0.21), false)
     _box(Vector3(63, -0.25, 0), Vector3(13, 0.22, 205), Color(0.10, 0.34, 0.43), false)
@@ -97,18 +97,7 @@ func _build_world():
     _build_battle_landmarks()
     _build_environment_details()
 
-    for cluster in range(3):
-        var cx = [-48.0, 8.0, 35.0][cluster]
-        var cz = [-12.0, 42.0, -58.0][cluster]
-        for i in range(8):
-            var x = cx + randf_range(-18, 18)
-            var z = cz + randf_range(-15, 15)
-            var w = randf_range(5.5, 9.0)
-            var d = randf_range(5.5, 8.5)
-            var wall_color = [Color(0.67,0.52,0.35), Color(0.72,0.66,0.52), Color(0.53,0.46,0.35)][i % 3]
-            _box(Vector3(x, 1.55, z), Vector3(w, 3.1, d), wall_color, true)
-            _box(Vector3(x, 3.22, z), Vector3(w + 0.8, 0.45, d + 0.8), Color(0.25, 0.20, 0.17), false)
-            _box(Vector3(x, 1.0, z + d * 0.51), Vector3(1.2, 2.0, 0.18), Color(0.20,0.13,0.08), false)
+    _spawn_asset_buildings()
 
     for i in range(90):
         var x = randf_range(-98, 98)
@@ -134,10 +123,6 @@ func _build_world():
 
 func _build_battle_landmarks() -> void:
     # Distinct combat locations so the arena reads like a small battleground.
-    _landmark_building(Vector3(-76, 0, 28), Vector3(17, 5.2, 14), Color(0.48, 0.43, 0.34)) # farm depot
-    _landmark_building(Vector3(18, 0, 72), Vector3(14, 4.6, 12), Color(0.62, 0.54, 0.41)) # roadside house
-    _landmark_building(Vector3(78, 0, -68), Vector3(19, 5.5, 15), Color(0.38, 0.43, 0.40)) # checkpoint
-    _landmark_building(Vector3(-78, 0, -70), Vector3(22, 6.0, 16), Color(0.42, 0.40, 0.35)) # warehouse
 
     # Industrial cover: shipping containers, crates and sandbag lines.
     for i in range(4):
@@ -155,18 +140,6 @@ func _build_battle_landmarks() -> void:
     _box(Vector3(42, 6.1, 54), Vector3(7.2, 0.45, 7.2), Color(0.34, 0.29, 0.22), true)
     _box(Vector3(42, 8.3, 54), Vector3(8.0, 0.35, 8.0), Color(0.22, 0.19, 0.16), true)
     _box(Vector3(42, 7.0, 54), Vector3(6.8, 1.35, 0.18), Color(0.16, 0.18, 0.15), true)
-
-func _landmark_building(center: Vector3, size: Vector3, wall_color: Color) -> void:
-    _box(center + Vector3(0, size.y * 0.5, 0), size, wall_color, true)
-    _box(center + Vector3(0, size.y + 0.25, 0), size + Vector3(1.2, 0.5, 1.2), Color(0.22, 0.19, 0.16), false)
-    # Shaded entrance, raised porch and framed windows.
-    _box(center + Vector3(0, 1.15, size.z * 0.5 + 0.04), Vector3(1.25, 2.3, 0.12), Color(0.15, 0.10, 0.065), false)
-    _box(center + Vector3(0, 0.18, size.z * 0.5 + 1.1), Vector3(3.8, 0.36, 2.4), Color(0.47, 0.42, 0.34), true)
-    _box(center + Vector3(0, size.y + 0.62, size.z * 0.5 + 1.0), Vector3(4.4, 0.22, 2.8), Color(0.25, 0.20, 0.16), false)
-    for side in [-1.0, 1.0]:
-        _box(center + Vector3(side * 1.65, 1.45, size.z * 0.5 + 1.0), Vector3(0.16, 2.5, 0.16), Color(0.31, 0.25, 0.18), true)
-        _box(center + Vector3(side * size.x * 0.28, 2.4, size.z * 0.5 + 0.06), Vector3(1.5, 0.95, 0.10), Color(0.16, 0.27, 0.30), false)
-        _box(center + Vector3(side * size.x * 0.28, 2.4, size.z * 0.5 + 0.12), Vector3(1.62, 0.12, 0.12), Color(0.25, 0.22, 0.18), false)
 
 func _build_environment_details() -> void:
     # Lightweight procedural scrub, boulders and roadside fence dressing.
@@ -231,15 +204,101 @@ func _box(pos: Vector3, size: Vector3, color: Color, solid: bool):
         root.add_child(collision)
     add_child(root)
 
+func _build_textured_terrain() -> void:
+    var ground := StaticBody3D.new()
+    ground.position = Vector3(0.0, -0.6, 0.0)
+    var mesh := MeshInstance3D.new()
+    var slab := BoxMesh.new()
+    slab.size = Vector3(210.0, 1.0, 210.0)
+    mesh.mesh = slab
+    var material := StandardMaterial3D.new()
+    var color_path := "res://assets/environment/textures/ground037/Ground037_Color.jpg"
+    var normal_path := "res://assets/environment/textures/ground037/Ground037_NormalGL.jpg"
+    var rough_path := "res://assets/environment/textures/ground037/Ground037_Roughness.jpg"
+    if ResourceLoader.exists(color_path):
+        material.albedo_texture = load(color_path)
+    if ResourceLoader.exists(normal_path):
+        material.normal_texture = load(normal_path)
+        material.normal_enabled = true
+    if ResourceLoader.exists(rough_path):
+        material.roughness_texture = load(rough_path)
+    material.roughness = 1.0
+    material.uv1_scale = Vector3(34.0, 34.0, 1.0)
+    mesh.material_override = material
+    ground.add_child(mesh)
+    var collision := CollisionShape3D.new()
+    var shape := BoxShape3D.new()
+    shape.size = slab.size
+    collision.shape = shape
+    ground.add_child(collision)
+    add_child(ground)
+
+func _spawn_asset_buildings() -> void:
+    var positions := [
+        Vector3(-76, 0, 28), Vector3(18, 0, 72), Vector3(78, 0, -68),
+        Vector3(-78, 0, -70), Vector3(-48, 0, -12), Vector3(8, 0, 42),
+        Vector3(35, 0, -58), Vector3(54, 0, 12), Vector3(-18, 0, 68),
+        Vector3(-58, 0, 76), Vector3(76, 0, 42), Vector3(4, 0, -82)
+    ]
+    var models := [
+        "res://assets/environment/buildings/building-type-a.glb",
+        "res://assets/environment/buildings/building-type-b.glb",
+        "res://assets/environment/buildings/building-type-d.glb",
+        "res://assets/environment/buildings/building-type-h.glb"
+    ]
+    for i in range(positions.size()):
+        var model_path: String = models[i % models.size()]
+        if not ResourceLoader.exists(model_path):
+            _box(positions[i] + Vector3(0, 1.8, 0), Vector3(10, 3.6, 9), Color(0.52, 0.48, 0.39), true)
+            continue
+        var packed := load(model_path) as PackedScene
+        if packed == null:
+            continue
+        var root := StaticBody3D.new()
+        root.position = positions[i]
+        root.rotation.y = randf_range(0.0, TAU)
+        var model := packed.instantiate() as Node3D
+        if model == null:
+            root.queue_free()
+            continue
+        model.scale = Vector3(1.7, 1.7, 1.7)
+        root.add_child(model)
+        var collision := CollisionShape3D.new()
+        var collision_shape := BoxShape3D.new()
+        collision_shape.size = Vector3(13.0, 5.5, 12.0)
+        collision.position.y = 2.75
+        collision.shape = collision_shape
+        root.add_child(collision)
+        add_child(root)
+
 func _tree(pos: Vector3):
+    var tree_path := "res://assets/environment/buildings/tree-large.glb" if randf() > 0.35 else "res://assets/environment/buildings/tree-small.glb"
+    if ResourceLoader.exists(tree_path):
+        var packed := load(tree_path) as PackedScene
+        if packed:
+            var tree_root := StaticBody3D.new()
+            tree_root.position = pos
+            tree_root.rotation.y = randf_range(0.0, TAU)
+            var tree_model := packed.instantiate() as Node3D
+            tree_model.scale = Vector3.ONE * randf_range(1.25, 2.0)
+            tree_root.add_child(tree_model)
+            var trunk := CollisionShape3D.new()
+            var trunk_shape := CylinderShape3D.new()
+            trunk_shape.radius = 0.45
+            trunk_shape.height = 3.2
+            trunk.position.y = 1.6
+            trunk.shape = trunk_shape
+            tree_root.add_child(trunk)
+            add_child(tree_root)
+            return
     _box(pos + Vector3(0, 1.3, 0), Vector3(0.45, 2.6, 0.45), Color(0.28, 0.16, 0.08), true)
-    var crown = MeshInstance3D.new()
-    var sphere = SphereMesh.new()
+    var crown := MeshInstance3D.new()
+    var sphere := SphereMesh.new()
     sphere.radius = 1.8
     sphere.height = 3.4
     crown.mesh = sphere
     crown.position = pos + Vector3(0, 3.2, 0)
-    var mat = StandardMaterial3D.new()
+    var mat := StandardMaterial3D.new()
     mat.albedo_color = Color(0.12, 0.34, 0.13)
     crown.material_override = mat
     add_child(crown)
