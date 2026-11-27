@@ -3,6 +3,7 @@ extends Node3D
 const PlayerScript = preload("res://scripts/player.gd")
 const BotScript = preload("res://scripts/bot.gd")
 const LootScript = preload("res://scripts/loot_pickup.gd")
+const WeaponPickupScript = preload("res://scripts/weapon_pickup.gd")
 var player
 var hud
 var bot_count := 8
@@ -354,6 +355,16 @@ func _spawn_loot() -> void:
             x += 24.0
         pickup.position = Vector3(x, 0.0, z)
         add_child(pickup)
+
+    # Place assault-rifle loot at recognizable combat locations.
+    var weapon_spawns := [Vector3(-58.0, 0.0, 44.0), Vector3(42.0, 0.0, 54.0), Vector3(18.0, 0.0, -62.0), Vector3(-72.0, 0.0, -28.0)]
+    for weapon_position in weapon_spawns:
+        var weapon_pickup := Area3D.new()
+        weapon_pickup.set_script(WeaponPickupScript)
+        weapon_pickup.set("weapon_type", "Assault Rifle")
+        weapon_pickup.set("ammo_amount", 30)
+        weapon_pickup.position = weapon_position
+        add_child(weapon_pickup)
 
 func _build_hud():
     var layer = CanvasLayer.new()
