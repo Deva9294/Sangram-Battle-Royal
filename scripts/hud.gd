@@ -47,6 +47,7 @@ func _ready():
     _button("PRONE", Vector2(-82, -225), Vector2(76, 46), "prone")
     _button("PICKUP", Vector2(-278, -280), Vector2(86, 46), "interact")
     _button("MEDKIT", Vector2(-180, -280), Vector2(86, 46), "use_medkit")
+    _button("DROP GUN", Vector2(-82, -280), Vector2(92, 46), "drop_weapon")
     _add_virtual_stick()
     var hint = Label.new()
     hint.text = "WASD MOVE  •  AIM  •  SPRINT  •  CROUCH  •  PRONE  •  FIRE"
@@ -133,6 +134,8 @@ func _button(caption: String, offset: Vector2, size: Vector2, action: String):
         b.pressed.connect(func(): player.interact())
     elif action == "use_medkit":
         b.pressed.connect(func(): player.use_medkit())
+    elif action == "drop_weapon":
+        b.pressed.connect(func(): player.drop_weapon())
     elif action == "jump":
         b.pressed.connect(func(): player.velocity.y = 7.0)
     else:
