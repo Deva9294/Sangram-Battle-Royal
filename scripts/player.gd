@@ -7,6 +7,11 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var health := 100
 var ammo := 30
 @onready var pivot: Node3D = $CameraPivot
+func _ready() -> void:
+    var visual := Node3D.new()
+    visual.name = "SoldierVisual"
+    visual.set_script(load("res://scripts/soldier_visual.gd"))
+    add_child(visual)
 func _unhandled_input(event: InputEvent) -> void:
     if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
         rotate_y(-event.relative.x * look_sensitivity)
@@ -39,7 +44,7 @@ func fire() -> void:
     if camera == null:
         return
     var ray_from := camera.global_position
-    var ray_to := ray_from + -camera.global_transform.basis.z * 80.0
+    var ray_to := ray_from + -camera.global_transform.basis.z * 120.0
     var query := PhysicsRayQueryParameters3D.create(ray_from, ray_to)
     query.exclude = [get_rid()]
     var hit := get_world_3d().direct_space_state.intersect_ray(query)
