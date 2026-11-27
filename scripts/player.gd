@@ -70,3 +70,6 @@ func fire() -> void:
     var hit := get_world_3d().direct_space_state.intersect_ray(query)
     if hit and hit.collider.has_method("take_damage"):
         hit.collider.take_damage(25)
+
+func take_damage(amount: int) -> void:
+    health = maxi(0, health - amount)
