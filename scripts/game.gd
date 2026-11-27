@@ -130,7 +130,7 @@ func _build_battle_landmarks() -> void:
 
     # Industrial cover: shipping containers, crates and sandbag lines.
     for i in range(4):
-        var container_color := [Color(0.48, 0.16, 0.12), Color(0.13, 0.29, 0.34), Color(0.39, 0.40, 0.31), Color(0.56, 0.42, 0.20)][i]
+        var container_color: Color = [Color(0.48, 0.16, 0.12), Color(0.13, 0.29, 0.34), Color(0.39, 0.40, 0.31), Color(0.56, 0.42, 0.20)][i]
         _box(Vector3(-60 + i * 12, 1.25, 45), Vector3(10.5, 2.5, 3.2), container_color, true)
         _box(Vector3(-60 + i * 12, 1.25, 48.4), Vector3(10.5, 2.5, 0.12), Color(0.10, 0.12, 0.12), false)
     for i in range(8):
