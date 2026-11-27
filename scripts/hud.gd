@@ -19,8 +19,10 @@ func _ready():
     set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     mouse_filter = Control.MOUSE_FILTER_IGNORE
     stats = Label.new()
-    stats.position = Vector2(22, 18)
-    stats.add_theme_font_size_override("font_size", 20)
+    stats.position = Vector2(18, 12)
+    stats.size = Vector2(get_viewport_rect().size.x - 36.0, 72.0)
+    stats.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    stats.add_theme_font_size_override("font_size", 15)
     stats.add_theme_color_override("font_color", Color.WHITE)
     stats.text = "SANGRAM  |  DEPLOYING..."
     add_child(stats)
@@ -49,9 +51,9 @@ func _ready():
     _button("MEDKIT", Vector2(-180, -280), Vector2(86, 46), "use_medkit")
     _add_virtual_stick()
     var hint = Label.new()
-    hint.text = "WASD MOVE  •  AIM  •  SPRINT  •  CROUCH  •  PRONE  •  FIRE"
-    hint.position = Vector2(22, 62)
-    hint.add_theme_font_size_override("font_size", 13)
+    hint.text = "MOVE • AIM • SPRINT • CROUCH • PRONE • FIRE"
+    hint.position = Vector2(18, 78)
+    hint.add_theme_font_size_override("font_size", 11)
     hint.add_theme_color_override("font_color", Color(1,1,1,0.9))
     add_child(hint)
 
