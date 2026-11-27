@@ -80,6 +80,7 @@ jobs:
           curl -fL "$BASE/universal-animation-library.glb" -o assets/animations/quaternius/universal-animation-library.glb
           curl -fL "$BASE/LICENSE-BASE-CHARACTERS.txt" -o assets/licenses/QUATERNIUS-BASE-CHARACTERS.txt
           curl -fL "$BASE/LICENSE-ANIMATIONS.txt" -o assets/licenses/QUATERNIUS-ANIMATIONS.txt
+          curl -fL "https://raw.githubusercontent.com/Hidencod/tge-assets/main/LICENSE" -o assets/licenses/KENNEY-CC0.txt
           CITY=https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/city-kit-suburban
           for model in building-type-a building-type-b building-type-c building-type-d; do
             curl -fL "$CITY/${model}.glb" -o "assets/environment/buildings/${model}.glb"
@@ -88,7 +89,13 @@ jobs:
           for map in color normal-gl roughness; do
             curl -fL "$GRASS/${map}.jpg" -o "assets/environment/grass/${map}.jpg"
           done
-          printf 'CC0 asset sources for Sangram\\n\\n- Quaternius Universal Base Characters + Universal Animation Library: https://quaternius.com/ (CC0 1.0)\\n- Kenney City Kit Suburban GLB models mirrored at https://github.com/Hidencod/tge-assets (Kenney CC0 1.0)\\n- ambientCG Grass 007 PBR maps: https://ambientcg.com/view?id=Grass007 (CC0 1.0)\\n' > assets/ASSET_SOURCES.md
+          cat > assets/ASSET_SOURCES.md <<'EOF'
+          # Sangram third-party assets
+          - Quaternius Universal Base Characters and Universal Animation Library, CC0 1.0. Original source: https://quaternius.com/
+          - Kenney City Kit Suburban GLB models, CC0 1.0. Original creator: Kenney. Mirror: https://github.com/Hidencod/tge-assets
+          - ambientCG Grass 007 PBR maps, CC0 1.0. Source: https://ambientcg.com/view?id=Grass007
+          See assets/licenses/ for bundled license notices.
+          EOF
           test "$(head -c 4 assets/characters/soldier/soldier.glb)" = "glTF"
           test "$(head -c 4 assets/animations/quaternius/universal-animation-library.glb)" = "glTF"
           echo "Downloaded asset sizes:"
