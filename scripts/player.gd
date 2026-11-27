@@ -47,7 +47,7 @@ var target_camera_position := STAND_CAMERA
 var target_fov := STAND_FOV
 var recoil_pitch := 0.0
 var recoil_yaw := 0.0
-var spawn_protection := 18.0
+var spawn_protection := 10.0
 var parachuting := false
 var parachute_visual: Node3D
 
