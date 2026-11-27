@@ -339,6 +339,7 @@ func _spawn_bots():
         var radius = randf_range(32, 82)
         var bot = CharacterBody3D.new()
         bot.set_script(BotScript)
+        bot.name = "Bot %02d" % (i + 1)
         bot.position = Vector3(cos(angle) * radius, 1.0, sin(angle) * radius)
         bot.target = player
         bot.add_to_group("bots")
@@ -406,7 +407,7 @@ func player_eliminated(attacker: Node = null):
     if hud:
         var killer_name := "UNKNOWN"
         if is_instance_valid(spectator_target):
-            killer_name = "ENEMY SOLDIER"
+            killer_name = str(spectator_target.name)
         hud.show_spectator(killer_name)
     _update_spectator_camera()
 
@@ -425,7 +426,7 @@ func spectator_next(direction: int) -> void:
     _select_spectator_target(direction)
     _update_spectator_camera()
     if hud and is_instance_valid(spectator_target):
-        hud.update_spectator_name("ENEMY SOLDIER")
+        hud.update_spectator_name(str(spectator_target.name))
 
 func _update_spectator_camera() -> void:
     if not is_instance_valid(spectator_camera):
