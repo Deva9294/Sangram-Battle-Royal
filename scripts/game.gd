@@ -14,6 +14,10 @@ var game_over := false
 var safe_ring: MeshInstance3D
 var kills := 0
 var match_started := false
+var player_dead := false
+var spectator_target: Node3D = null
+var spectator_camera: Camera3D
+var spectator_index := 0
 const ZONE_WAIT := 20.0
 const ZONE_SHRINK_RATE := 0.42
 const ZONE_MIN_RADIUS := 14.0
@@ -30,6 +34,8 @@ func _ready():
 
 func _process(delta):
     if game_over or not match_started: return
+    if player_dead:
+        _update_spectator_camera()
     elapsed += delta
     battle_start_grace = maxf(0.0, battle_start_grace - delta)
     var shrink_elapsed = maxf(0.0, elapsed - ZONE_WAIT)
@@ -45,12 +51,15 @@ func _process(delta):
         var enemy_distance = Vector2(enemy.global_position.x, enemy.global_position.z).length()
         if enemy_distance > safe_radius:
             enemy.take_damage(4.0 * delta, self)
-    var remaining = get_tree().get_nodes_in_group("bots").size()
+    var remaining := 0
+    for bot in get_tree().get_nodes_in_group("bots"):
+        if is_instance_valid(bot) and bot.get("alive") == true:
+            remaining += 1
     var zone_countdown = maxf(0.0, ZONE_WAIT - elapsed)
     if hud: hud.update_stats(player, remaining, safe_radius, elapsed, kills, zone_countdown)
     if remaining == 0 and not game_over:
         game_over = true
-        if hud: hud.show_result(true, kills)
+        if hud: hud.show_result(not player_dead, kills)
 
 func _build_world():
     var env = WorldEnvironment.new()
@@ -380,11 +389,56 @@ func bot_eliminated(attacker = null):
         kills += 1
         if hud: hud.show_message("ENEMY ELIMINATED  +1")
 
-func player_eliminated():
-    game_over = true
-    for enemy in get_tree().get_nodes_in_group("bots"):
-        if is_instance_valid(enemy):
-            enemy.set_physics_process(false)
+func player_eliminated(attacker: Node = null):
+    if player_dead:
+        return
+    player_dead = true
+    player.eliminated = true
+    if attacker is Node3D and is_instance_valid(attacker) and attacker.get("alive") == true:
+        spectator_target = attacker
+    else:
+        _select_spectator_target(0)
+    spectator_camera = Camera3D.new()
+    spectator_camera.name = "DeathSpectatorCamera"
+    spectator_camera.fov = 62.0
+    add_child(spectator_camera)
+    spectator_camera.current = true
+    if hud:
+        var killer_name := "UNKNOWN"
+        if is_instance_valid(spectator_target):
+            killer_name = "ENEMY SOLDIER"
+        hud.show_spectator(killer_name)
+    _update_spectator_camera()
+
+func _select_spectator_target(direction: int) -> void:
+    var living: Array[Node3D] = []
+    for bot in get_tree().get_nodes_in_group("bots"):
+        if is_instance_valid(bot) and bot.get("alive") == true:
+            living.append(bot as Node3D)
+    if living.is_empty():
+        spectator_target = null
+        return
+    spectator_index = posmod(spectator_index + direction, living.size())
+    spectator_target = living[spectator_index]
+
+func spectator_next(direction: int) -> void:
+    _select_spectator_target(direction)
+    _update_spectator_camera()
+    if hud and is_instance_valid(spectator_target):
+        hud.update_spectator_name("ENEMY SOLDIER")
+
+func _update_spectator_camera() -> void:
+    if not is_instance_valid(spectator_camera):
+        return
+    if not is_instance_valid(spectator_target) or spectator_target.get("alive") != true:
+        _select_spectator_target(0)
+    if not is_instance_valid(spectator_target):
+        if hud:
+            hud.show_result(false, kills)
+        return
+    var behind: Vector3 = spectator_target.global_transform.basis.z.normalized()
+    spectator_camera.global_position = spectator_target.global_position + behind * 5.0 + Vector3.UP * 2.2
+    spectator_camera.look_at(spectator_target.global_position + Vector3.UP * 1.25, Vector3.UP)
 
 
 # Central India-inspired rural combat zone: tiled homes, courtyards,
