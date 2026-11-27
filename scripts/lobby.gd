@@ -65,89 +65,168 @@ func _add_box(pos: Vector3, size: Vector3, color: Color):
     add_child(mesh)
 
 func _build_interface():
-    var layer = CanvasLayer.new()
+    var layer := CanvasLayer.new()
+    layer.layer = 5
     add_child(layer)
-    var shade = ColorRect.new()
-    shade.color = Color(0.015,0.025,0.035,0.42)
-    shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-    layer.add_child(shade)
-    var top = Label.new()
-    top.text = "D E V A C O R E   S T U D I O     •     PRESENTS"
-    top.position = Vector2(34,22)
-    top.add_theme_font_size_override("font_size",15)
-    top.add_theme_color_override("font_color",Color(0.92,0.72,0.42))
-    layer.add_child(top)
-    var logo = Label.new()
-    logo.text = "SANGRAM"
-    logo.position = Vector2(30,50)
-    logo.add_theme_font_size_override("font_size",52)
-    logo.add_theme_color_override("font_color",Color(1,1,1))
-    logo.add_theme_color_override("font_shadow_color",Color(0,0,0,0.8))
-    logo.add_theme_constant_override("shadow_offset_x",3)
-    logo.add_theme_constant_override("shadow_offset_y",3)
-    layer.add_child(logo)
-    var subtitle = Label.new()
-    subtitle.text = "BATTLE ROYALE  /  MADHYA PRADESH"
-    subtitle.position = Vector2(36,112)
-    subtitle.add_theme_font_size_override("font_size",15)
-    subtitle.add_theme_color_override("font_color",Color(0.85,0.88,0.88))
-    layer.add_child(subtitle)
-    var panel = PanelContainer.new()
-    panel.position = Vector2(28,180)
-    panel.size = Vector2(360,455)
-    var panel_style = StyleBoxFlat.new()
-    panel_style.bg_color = Color(0.025,0.045,0.055,0.88)
-    panel_style.border_color = Color(0.78,0.48,0.18,0.85)
-    panel_style.set_border_width_all(1)
-    panel_style.set_corner_radius_all(8)
-    panel.add_theme_stylebox_override("panel",panel_style)
-    layer.add_child(panel)
-    var layout = VBoxContainer.new()
-    layout.add_theme_constant_override("separation",12)
-    layout.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    panel.add_child(layout)
-    var heading = Label.new()
-    heading.text = "DEPLOYMENT LOBBY"
-    heading.add_theme_font_size_override("font_size",21)
-    heading.add_theme_color_override("font_color",Color(0.96,0.72,0.35))
-    layout.add_child(heading)
-    info_label = Label.new()
-    info_label.custom_minimum_size = Vector2(0,62)
-    info_label.add_theme_font_size_override("font_size",17)
-    info_label.add_theme_color_override("font_color",Color.WHITE)
-    layout.add_child(info_label)
-    var choose = Label.new()
-    choose.text = "SELECT YOUR OPERATOR"
-    choose.add_theme_font_size_override("font_size",13)
-    choose.add_theme_color_override("font_color",Color(0.65,0.75,0.78))
-    layout.add_child(choose)
+
+    var screen := ColorRect.new()
+    screen.color = Color(0.012, 0.022, 0.03, 0.28)
+    screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    screen.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    layer.add_child(screen)
+
+    # Header / brand strip
+    var brand := Label.new()
+    brand.text = "SANGRAM"
+    brand.position = Vector2(28, 16)
+    brand.add_theme_font_size_override("font_size", 34)
+    brand.add_theme_color_override("font_color", Color(0.98, 0.96, 0.88))
+    brand.add_theme_constant_override("outline_size", 4)
+    brand.add_theme_color_override("font_outline_color", Color(0.04, 0.07, 0.08))
+    layer.add_child(brand)
+
+    var tagline := Label.new()
+    tagline.text = "INDIA'S BATTLEFIELD  •  DEVA CORE STUDIO"
+    tagline.position = Vector2(31, 54)
+    tagline.add_theme_font_size_override("font_size", 10)
+    tagline.add_theme_color_override("font_color", Color(0.85, 0.66, 0.34))
+    layer.add_child(tagline)
+
+    var status := _lobby_label("●  OFFLINE BOT MATCH  |  24 ENEMIES", 12, Color(0.60, 0.92, 0.70))
+    status.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+    status.position = Vector2(-260, 22)
+    status.size = Vector2(240, 28)
+    status.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+    layer.add_child(status)
+
+    # Left operator selection card
+    var left := _lobby_panel(layer, Vector2(24, 104), Vector2(238, 222))
+    var left_layout := VBoxContainer.new()
+    left_layout.add_theme_constant_override("separation", 7)
+    left.add_child(left_layout)
+    left_layout.add_child(_lobby_label("YOUR OPERATOR", 12, Color(0.94, 0.68, 0.32)))
+    info_label = _lobby_label("VEER\nASSAULT • MALWA FRONTIER", 18, Color(0.97, 0.97, 0.91))
+    info_label.custom_minimum_size = Vector2(0, 52)
+    left_layout.add_child(info_label)
+    left_layout.add_child(_lobby_label("SELECT SOLDIER", 10, Color(0.62, 0.72, 0.74)))
     for i in range(operator_names.size()):
-        var b = Button.new()
-        b.text = "%02d   %s" % [i+1,operator_names[i]]
-        b.custom_minimum_size = Vector2(0,44)
+        var b := _lobby_button("%02d   %s" % [i + 1, operator_names[i]], false)
+        b.custom_minimum_size = Vector2(0, 34)
         b.pressed.connect(_select_operator.bind(i))
-        layout.add_child(b)
-    var map_label = Label.new()
-    map_label.text = "MAP  •  MALWA FRONTIER, MADHYA PRADESH\nMODE  •  OFFLINE SURVIVAL  •  24 ENEMIES"
-    map_label.add_theme_font_size_override("font_size",13)
-    map_label.add_theme_color_override("font_color",Color(0.78,0.84,0.83))
-    layout.add_child(map_label)
-    var deploy = Button.new()
-    deploy.text = "▶   DEPLOY"
-    deploy.custom_minimum_size = Vector2(0,58)
-    deploy.add_theme_font_size_override("font_size",22)
-    var deploy_style = StyleBoxFlat.new()
-    deploy_style.bg_color = Color(0.72,0.30,0.08)
-    deploy_style.set_corner_radius_all(5)
-    deploy.add_theme_stylebox_override("normal",deploy_style)
+        left_layout.add_child(b)
+
+    # Right mission / map card
+    var right := _lobby_panel(layer, Vector2(-252, 104), Vector2(228, 222), true)
+    var right_layout := VBoxContainer.new()
+    right_layout.add_theme_constant_override("separation", 8)
+    right.add_child(right_layout)
+    right_layout.add_child(_lobby_label("MISSION BRIEF", 12, Color(0.94, 0.68, 0.32)))
+    right_layout.add_child(_lobby_label("MALWA FRONTIER", 17, Color(0.98, 0.97, 0.90)))
+    right_layout.add_child(_lobby_label("MADHYA PRADESH  /  INDIA", 10, Color(0.68, 0.78, 0.78)))
+    right_layout.add_child(_lobby_label("MODE     SOLO SURVIVAL", 11, Color(0.91, 0.92, 0.86)))
+    right_layout.add_child(_lobby_label("ENEMIES  24 AI SOLDIERS", 11, Color(0.91, 0.92, 0.86)))
+    right_layout.add_child(_lobby_label("MAP STATUS  •  TRAINING BUILD", 9, Color(0.63, 0.76, 0.68)))
+    var briefing := _lobby_label("LOOT  •  SAFE ZONE  •  LAST SURVIVOR WINS", 9, Color(0.84, 0.78, 0.62))
+    briefing.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    right_layout.add_child(briefing)
+
+    # Bottom navigation and deployment bar
+    var footer := _lobby_panel(layer, Vector2(24, -72), Vector2(-48, 54), false, true)
+    var footer_row := HBoxContainer.new()
+    footer_row.add_theme_constant_override("separation", 10)
+    footer.add_child(footer_row)
+    var tabs := ["LOADOUT", "MISSIONS", "REWARDS"]
+    for tab in tabs:
+        var tab_button := _lobby_button(tab, false)
+        tab_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        tab_button.custom_minimum_size = Vector2(0, 38)
+        footer_row.add_child(tab_button)
+        tab_button.pressed.connect(func(): _show_lobby_notice(tab + "  •  COMING IN A FUTURE UPDATE"))
+    var deploy := _lobby_button("▶   DEPLOY NOW", true)
+    deploy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    deploy.custom_minimum_size = Vector2(0, 42)
+    footer_row.add_child(deploy)
     deploy.pressed.connect(_deploy)
-    layout.add_child(deploy)
-    var foot = Label.new()
-    foot.text = "CHARACTER / TRAINING LOBBY  •  BUILD 0.2"
-    foot.position = Vector2(32, get_viewport().get_visible_rect().size.y - 32)
-    foot.add_theme_font_size_override("font_size",11)
-    foot.add_theme_color_override("font_color",Color(0.72,0.76,0.76))
-    layer.add_child(foot)
+
+    var bottom_note := _lobby_label("BUILD 0.3  •  OFFLINE SURVIVAL  •  CENTRAL INDIA MAP", 9, Color(0.75, 0.80, 0.78))
+    bottom_note.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+    bottom_note.position = Vector2(28, -18)
+    bottom_note.size = Vector2(320, 16)
+    layer.add_child(bottom_note)
+
+    var vignette := ColorRect.new()
+    vignette.color = Color(0.01, 0.02, 0.025, 0.10)
+    vignette.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    layer.add_child(vignette)
+    vignette.z_index = -1
+
+func _lobby_panel(parent: Control, offset: Vector2, panel_size: Vector2, right_side := false, bottom := false) -> PanelContainer:
+    var panel := PanelContainer.new()
+    if bottom:
+        panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+        panel.offset_left = offset.x
+        panel.offset_top = offset.y
+        panel.offset_right = offset.y
+        panel.offset_bottom = 0
+    elif right_side:
+        panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+        panel.position = offset
+        panel.size = panel_size
+    else:
+        panel.position = offset
+        panel.size = panel_size
+    var style := StyleBoxFlat.new()
+    style.bg_color = Color(0.025, 0.045, 0.052, 0.88)
+    style.border_color = Color(0.72, 0.43, 0.17, 0.92)
+    style.set_border_width_all(1)
+    style.set_corner_radius_all(7)
+    style.content_margin_left = 12
+    style.content_margin_right = 12
+    style.content_margin_top = 10
+    style.content_margin_bottom = 10
+    panel.add_theme_stylebox_override("panel", style)
+    parent.add_child(panel)
+    return panel
+
+func _lobby_label(value: String, font_size: int, tint: Color) -> Label:
+    var label := Label.new()
+    label.text = value
+    label.add_theme_font_size_override("font_size", font_size)
+    label.add_theme_color_override("font_color", tint)
+    label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
+    label.add_theme_constant_override("shadow_offset_x", 1)
+    label.add_theme_constant_override("shadow_offset_y", 1)
+    return label
+
+func _lobby_button(value: String, primary: bool) -> Button:
+    var button := Button.new()
+    button.text = value
+    button.add_theme_font_size_override("font_size", 12 if not primary else 16)
+    var normal := StyleBoxFlat.new()
+    normal.bg_color = Color(0.12, 0.17, 0.17, 0.96) if not primary else Color(0.70, 0.29, 0.075, 1.0)
+    normal.border_color = Color(0.48, 0.54, 0.48) if not primary else Color(1.0, 0.69, 0.30)
+    normal.set_border_width_all(1)
+    normal.set_corner_radius_all(4)
+    normal.content_margin_left = 8
+    normal.content_margin_right = 8
+    normal.content_margin_top = 5
+    normal.content_margin_bottom = 5
+    var hover := normal.duplicate() as StyleBoxFlat
+    hover.bg_color = Color(0.22, 0.29, 0.25) if not primary else Color(0.86, 0.39, 0.10)
+    button.add_theme_stylebox_override("normal", normal)
+    button.add_theme_stylebox_override("hover", hover)
+    button.add_theme_stylebox_override("pressed", hover)
+    button.add_theme_color_override("font_color", Color(0.96, 0.96, 0.90))
+    button.add_theme_color_override("font_hover_color", Color.WHITE)
+    return button
+
+func _show_lobby_notice(message: String) -> void:
+    var popup := AcceptDialog.new()
+    popup.title = "SANGRAM COMMAND"
+    popup.dialog_text = message
+    add_child(popup)
+    popup.popup_centered()
 
 func _select_operator(index: int):
     selected_operator = index
