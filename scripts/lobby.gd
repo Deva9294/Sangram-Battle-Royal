@@ -167,7 +167,7 @@ func _lobby_panel(parent: Control, offset: Vector2, panel_size: Vector2, right_s
         panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
         panel.offset_left = offset.x
         panel.offset_top = offset.y
-        panel.offset_right = offset.y
+        panel.offset_right = -24
         panel.offset_bottom = 0
     elif right_side:
         panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
