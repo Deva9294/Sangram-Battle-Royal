@@ -25,8 +25,13 @@ for model in Rifleman ReconScout ArmySniper CombatMedic ArmyOfficer ArmyGeneral 
   download "$CHAR_BASE/$model.glb" "$CHAR_DIR/$model.glb"
 done
 
-# Mid-poly PBR military character (MIT; license embedded in GLB).
-download "https://models.codelove.in/models/military-male-03.glb" "$CHAR_DIR/MaleSoldier03.glb"
+# Game-ready rigged field soldiers with actual Idle/Walk/Run animation clips.
+# CC BY 4.0: attribution is recorded in ASSETS_LICENSES.md.
+VINI_BASE="https://vinish-models.pages.dev/soldiers"
+download "$VINI_BASE/infantry-soldier.glb" "$CHAR_DIR/InfantrySoldier.glb"
+download "$VINI_BASE/paratrooper.glb" "$CHAR_DIR/Paratrooper.glb"
+download "$VINI_BASE/desert-soldier.glb" "$CHAR_DIR/DesertSoldier.glb"
+download "$VINI_BASE/jungle-scout.glb" "$CHAR_DIR/JungleScout.glb"
 
 # CC0 Kenney City Kit Suburban building and tree models.
 ENV_BASE="https://raw.githubusercontent.com/petroulacl/fps-buildings-env-kit/main"
