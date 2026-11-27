@@ -8,7 +8,7 @@ extends CharacterBody3D
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var health := 100
 var ammo := 30
-var look_touch_id := -1
+var look_touch_id := -1\nvar soldier_visual: Node3D
 @onready var pivot: Node3D = $CameraPivot
 
 func _ready() -> void:
