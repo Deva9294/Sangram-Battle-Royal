@@ -47,6 +47,8 @@ var target_camera_position := STAND_CAMERA
 var target_fov := STAND_FOV
 var recoil_pitch := 0.0
 var recoil_yaw := 0.0
+var killer_target: Node3D = null
+var spectator_active := false
 
 func _ready() -> void:
     add_to_group("player")
@@ -196,6 +198,12 @@ func _look(delta: Vector2, sensitivity: float) -> void:
         deg_to_rad(35.0)
     )
 
+func _process(delta: float) -> void:
+    if spectator_active and is_instance_valid(killer_target) and camera:
+        var desired_position := killer_target.global_position + killer_target.global_transform.basis.z * 4.2 + Vector3.UP * 2.1
+        camera.global_position = camera.global_position.lerp(desired_position, minf(1.0, delta * 2.8))
+        camera.look_at(killer_target.global_position + Vector3.UP * 1.15, Vector3.UP)
+
 func _physics_process(delta: float) -> void:
     if eliminated:
         return
@@ -320,7 +328,7 @@ func reload() -> void:
     if reload_time <= 0.0 and ammo < 30 and reserve_ammo > 0:
         reload_time = 1.6
 
-func take_damage(amount: float) -> void:
+func take_damage(amount: float, attacker: Node3D = null) -> void:
     if eliminated:
         return
     var absorbed := minf(armor, amount * 0.65)
@@ -330,6 +338,8 @@ func take_damage(amount: float) -> void:
         hud.show_damage()
     if health <= 0.0:
         eliminated = true
+        killer_target = attacker
+        spectator_active = is_instance_valid(killer_target)
         _play_visual_animation("Death")
         if hud:
             hud.show_result(false)
