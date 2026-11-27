@@ -179,7 +179,7 @@ func _physics_process(delta: float) -> void:
     if distance <= weapon_range and attack_timer <= 0.0 and _has_line_of_sight():
         attack_timer = fire_interval
         if target.has_method("take_damage"):
-            target.call("take_damage", damage_per_shot)
+            target.call("take_damage", damage_per_shot, self)
 
     if not is_on_floor():
         velocity.y -= 22.0 * delta
