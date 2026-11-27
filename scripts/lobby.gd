@@ -14,6 +14,8 @@ var matchmaking_remaining := 12.0
 var matchmaking_label: Label
 var matchmaking_panel: PanelContainer
 var matchmaking_layer: CanvasLayer
+var network_address: LineEdit
+var network_status: Label
 
 func _ready():
     _build_lobby_world()
@@ -106,7 +108,7 @@ func _build_interface():
     layer.add_child(subtitle)
     var panel = PanelContainer.new()
     panel.position = Vector2(28,180)
-    panel.size = Vector2(360,455)
+    panel.size = Vector2(360,560)
     var panel_style = StyleBoxFlat.new()
     panel_style.bg_color = Color(0.025,0.045,0.055,0.88)
     panel_style.border_color = Color(0.78,0.48,0.18,0.85)
@@ -152,8 +154,44 @@ func _build_interface():
     deploy_style.bg_color = Color(0.72,0.30,0.08)
     deploy_style.set_corner_radius_all(5)
     deploy.add_theme_stylebox_override("normal",deploy_style)
+    deploy.text = "▶   OFFLINE BOT BATTLE"
     deploy.pressed.connect(_deploy)
     layout.add_child(deploy)
+
+    var online_heading := Label.new()
+    online_heading.text = "ONLINE MULTIPLAYER • ENET HOST / JOIN"
+    online_heading.add_theme_font_size_override("font_size", 13)
+    online_heading.add_theme_color_override("font_color", Color(0.65,0.75,0.78))
+    layout.add_child(online_heading)
+
+    network_address = LineEdit.new()
+    network_address.placeholder_text = "Host IP address (e.g. 192.168.1.10)"
+    network_address.custom_minimum_size = Vector2(0, 40)
+    layout.add_child(network_address)
+
+    var online_row := HBoxContainer.new()
+    var host_button := Button.new()
+    host_button.text = "HOST MATCH"
+    host_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    host_button.custom_minimum_size.y = 44
+    host_button.pressed.connect(_host_online)
+    online_row.add_child(host_button)
+    var join_button := Button.new()
+    join_button.text = "JOIN MATCH"
+    join_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    join_button.custom_minimum_size.y = 44
+    join_button.pressed.connect(_join_online)
+    online_row.add_child(join_button)
+    layout.add_child(online_row)
+
+    network_status = Label.new()
+    network_status.text = "Offline mode ready • Online requires reachable host"
+    network_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    network_status.add_theme_font_size_override("font_size", 12)
+    network_status.add_theme_color_override("font_color", Color(0.78,0.84,0.83))
+    layout.add_child(network_status)
+    NetworkSession.session_changed.connect(_on_network_status)
+
     var foot = Label.new()
     foot.text = "CHARACTER / TRAINING LOBBY  •  BUILD 0.2"
     foot.position = Vector2(32, get_viewport().get_visible_rect().size.y - 32)
@@ -236,6 +274,23 @@ func _part(pos: Vector3, size: Vector3, color: Color, sphere := false):
     mat.roughness = 0.82
     mesh.material_override = mat
     preview_root.add_child(mesh)
+
+func _host_online() -> void:
+    var result: Error = NetworkSession.host_game()
+    _on_network_status(NetworkSession.mode, NetworkSession.status)
+    if result == OK:
+        network_status.text += "\\nShare your public IP and open UDP port 2456 to let players join."
+
+func _join_online() -> void:
+    var address := network_address.text.strip_edges()
+    var result: Error = NetworkSession.join_game(address)
+    _on_network_status(NetworkSession.mode, NetworkSession.status)
+    if result == OK:
+        network_status.text += "\\nTransport connected when host accepts; gameplay sync is a separate milestone."
+
+func _on_network_status(mode: String, message: String) -> void:
+    if network_status and is_instance_valid(network_status):
+        network_status.text = ("ONLINE • " if mode == "online" else "OFFLINE • ") + message
 
 func _deploy():
     if matchmaking_active:
