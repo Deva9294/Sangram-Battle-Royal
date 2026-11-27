@@ -7,11 +7,11 @@ extends CharacterBody3D
 @export var attack_interval := 1.2
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var target: Node3D
-var attack_clock := 0.0
+var attack_clock := 0.0\nvar visual: Node3D
 
 func _ready() -> void:
     target = get_tree().get_first_node_in_group("player")
-    var visual := Node3D.new()
+    visual = Node3D.new()
     visual.name = "EnemySoldierVisual"
     visual.set_script(load("res://scripts/soldier_visual.gd"))
     add_child(visual)
@@ -37,7 +37,7 @@ func _physics_process(delta: float) -> void:
         if distance <= attack_range and attack_clock >= attack_interval and target.has_method("take_damage"):
             target.take_damage(attack_damage)
             attack_clock = 0.0
-    move_and_slide()
+    move_and_slide()\n    if visual and visual.has_method("play_locomotion"):\n        visual.play_locomotion(Vector2(velocity.x, velocity.z).length() > 0.2)
 
 func take_damage(amount: int) -> void:
     health -= amount
