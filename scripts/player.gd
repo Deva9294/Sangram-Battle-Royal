@@ -94,7 +94,7 @@ func _ready() -> void:
 func _build_player_visual() -> void:
     visual_root = Node3D.new()
     add_child(visual_root)
-    var model_path := "res://assets/characters/ReconScout.glb"
+    var model_path := "res://assets/characters/MaleSoldier03.glb"
     var imported_model_loaded := false
     if ResourceLoader.exists(model_path):
         var model_scene := load(model_path) as PackedScene
