@@ -37,6 +37,7 @@ func _build_soldier() -> void:
             var model := model_scene.instantiate() as Node3D
             model.rotation.y = PI
             visual_root.add_child(model)
+            _fit_character_model(model, 1.9)
             model.visible = true
             _set_model_meshes_visible(model)
             visual_animation = _find_animation_player(model)
@@ -54,6 +55,25 @@ func _build_soldier() -> void:
     collision.shape = shape
     collision.position.y = 0.9
     add_child(collision)
+
+func _fit_character_model(model: Node3D, target_height: float) -> void:
+    var combined := AABB()
+    var found := false
+    var model_inverse := model.global_transform.affine_inverse()
+    var stack: Array[Node] = [model]
+    while not stack.is_empty():
+        var node: Node = stack.pop_back()
+        if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+            var mesh_instance := node as MeshInstance3D
+            var mesh_bounds: AABB = model_inverse * mesh_instance.global_transform * mesh_instance.get_aabb()
+            combined = mesh_bounds if not found else combined.merge(mesh_bounds)
+            found = true
+        for child in node.get_children():
+            stack.append(child)
+    if found and combined.size.y > 0.01:
+        var scale_factor := target_height / combined.size.y
+        model.scale *= scale_factor
+        model.position.y -= combined.position.y * scale_factor
 
 func _build_procedural_soldier() -> void:
     _part(Vector3(0, 1.0, 0), Vector3(0.62, 0.78, 0.34), Color(0.23, 0.29, 0.22))
