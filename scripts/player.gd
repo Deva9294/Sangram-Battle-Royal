@@ -14,11 +14,11 @@ class_name SangramPlayer
 const STAND_HEIGHT := 1.8
 const CROUCH_HEIGHT := 1.2
 const PRONE_HEIGHT := 0.90
-const STAND_CAMERA := Vector3(0.0, 0.92, 3.25)
-const CROUCH_CAMERA := Vector3(0.0, 0.68, 3.0)
-const PRONE_CAMERA := Vector3(0.0, 0.38, 2.65)
-const STAND_FOV := 68.0
-const ADS_FOV := 55.0
+const STAND_CAMERA := Vector3(0.48, 0.18, 2.45)
+const CROUCH_CAMERA := Vector3(0.48, 0.08, 2.25)
+const PRONE_CAMERA := Vector3(0.42, 0.12, 1.95)
+const STAND_FOV := 62.0
+const ADS_FOV := 48.0
 
 var health := 100.0
 var armor := 0.0
@@ -78,7 +78,7 @@ func _ready() -> void:
 
     camera = Camera3D.new()
     camera.position = STAND_CAMERA
-    camera.rotation.x = deg_to_rad(-10.0)
+    camera.rotation.x = deg_to_rad(-7.0)
     camera.fov = STAND_FOV
     camera.current = true
     camera_pivot.add_child(camera)
@@ -333,7 +333,7 @@ func _update_camera(delta: float) -> void:
     var aiming := Input.is_action_pressed("aim") and current_stance != "prone"
     target_fov = ADS_FOV if aiming else STAND_FOV
     if Input.is_action_pressed("sprint") and current_stance == "stand" and not aiming:
-        target_fov = 82.0
+        target_fov = 72.0
     camera.position = camera.position.lerp(target_camera_position, minf(1.0, delta * 8.0))
     camera.fov = lerpf(camera.fov, target_fov, minf(1.0, delta * 9.0))
     if recoil_pitch != 0.0 or recoil_yaw != 0.0:
