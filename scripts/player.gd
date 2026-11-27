@@ -364,7 +364,19 @@ func _update_camera(delta: float) -> void:
     target_fov = ADS_FOV if aiming else STAND_FOV
     if Input.is_action_pressed("sprint") and current_stance == "stand" and not aiming:
         target_fov = 72.0
-    camera.position = camera.position.lerp(target_camera_position, minf(1.0, delta * 8.0))
+
+    # Smooth shoulder camera with a physics ray so it never clips through walls.
+    var wanted_position := target_camera_position
+    var ray_start := camera_pivot.global_position
+    var ray_end := camera_pivot.to_global(wanted_position)
+    var query := PhysicsRayQueryParameters3D.create(ray_start, ray_end, 1, [get_rid()])
+    var hit := get_world_3d().direct_space_state.intersect_ray(query)
+    if not hit.is_empty():
+        var safe_point: Vector3 = hit.position + hit.normal * 0.16
+        wanted_position = camera_pivot.to_local(safe_point)
+        wanted_position.z = maxf(wanted_position.z, 0.28)
+
+    camera.position = camera.position.lerp(wanted_position, minf(1.0, delta * 12.0))
     camera.fov = lerpf(camera.fov, target_fov, minf(1.0, delta * 9.0))
     if recoil_pitch != 0.0 or recoil_yaw != 0.0:
         camera.rotation.x = clampf(camera.rotation.x + recoil_pitch, deg_to_rad(-65.0), deg_to_rad(35.0))
