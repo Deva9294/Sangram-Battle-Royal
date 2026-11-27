@@ -8,15 +8,16 @@ extends CharacterBody3D
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var health := 100
 var ammo := 30
-var look_touch_id := -1\nvar soldier_visual: Node3D
+var look_touch_id := -1
+var soldier_visual: Node3D
 @onready var pivot: Node3D = $CameraPivot
 
 func _ready() -> void:
     add_to_group("player")
-    var visual := Node3D.new()
-    visual.name = "SoldierVisual"
-    visual.set_script(load("res://scripts/soldier_visual.gd"))
-    add_child(visual)
+    soldier_visual = Node3D.new()
+    soldier_visual.name = "SoldierVisual"
+    soldier_visual.set_script(load("res://scripts/soldier_visual.gd"))
+    add_child(soldier_visual)
 
 func _unhandled_input(event: InputEvent) -> void:
     if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
@@ -55,6 +56,8 @@ func _physics_process(delta: float) -> void:
         velocity.x = move_toward(velocity.x, 0.0, speed * 5.0 * delta)
         velocity.z = move_toward(velocity.z, 0.0, speed * 5.0 * delta)
     move_and_slide()
+    if soldier_visual and soldier_visual.has_method("play_locomotion"):
+        soldier_visual.play_locomotion(direction.length() > 0.01, Input.is_action_pressed("sprint"))
 
 func fire() -> void:
     if ammo <= 0:
