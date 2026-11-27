@@ -68,8 +68,8 @@ func _build_world():
     add_child(sun)
 
     _box(Vector3(0, -0.6, 0), Vector3(210, 1, 210), Color(0.27, 0.34, 0.16), true)
-    _box(Vector3(0, -0.22, -38), Vector3(205, 0.12, 10), Color(0.42, 0.34, 0.22), false)
-    _box(Vector3(-34, -0.18, 0), Vector3(9, 0.15, 205), Color(0.39, 0.32, 0.22), false)
+    _box(Vector3(0, -0.22, -38), Vector3(205, 0.12, 12), Color(0.20, 0.22, 0.21), false)
+    _box(Vector3(-34, -0.18, 0), Vector3(11, 0.15, 205), Color(0.20, 0.22, 0.21), false)
     _box(Vector3(63, -0.25, 0), Vector3(13, 0.22, 205), Color(0.10, 0.34, 0.43), false)
     _box(Vector3(63, 0.05, 22), Vector3(19, 0.55, 8), Color(0.48, 0.43, 0.34), false)
 
@@ -79,6 +79,12 @@ func _build_world():
         _box(Vector3(px, -0.05, pz), Vector3(25, 0.08, 42), Color(0.38, 0.39, 0.13), false)
         for row in range(9):
             _box(Vector3(px - 10.0 + row * 2.5, 0.06, pz), Vector3(0.12, 0.12, 38), Color(0.53, 0.46, 0.18), false)
+
+    # Main road markings and cross-country tracks
+    for mark in range(18):
+        _box(Vector3(-94.0 + mark * 11.0, -0.12, -38.0), Vector3(4.5, 0.025, 0.22), Color(0.78, 0.72, 0.52), false)
+        _box(Vector3(-34.0, -0.10, -94.0 + mark * 11.0), Vector3(0.22, 0.025, 4.5), Color(0.78, 0.72, 0.52), false)
+    _build_battle_landmarks()
 
     for cluster in range(3):
         var cx = [-48.0, 8.0, 35.0][cluster]
@@ -114,6 +120,39 @@ func _build_world():
     ring_mat.emission = Color(0.04, 0.42, 0.7)
     safe_ring.material_override = ring_mat
     add_child(safe_ring)
+
+func _build_battle_landmarks() -> void:
+    # Distinct combat locations so the arena reads like a small battleground.
+    _landmark_building(Vector3(-76, 0, 28), Vector3(17, 5.2, 14), Color(0.48, 0.43, 0.34)) # farm depot
+    _landmark_building(Vector3(18, 0, 72), Vector3(14, 4.6, 12), Color(0.62, 0.54, 0.41)) # roadside house
+    _landmark_building(Vector3(78, 0, -68), Vector3(19, 5.5, 15), Color(0.38, 0.43, 0.40)) # checkpoint
+    _landmark_building(Vector3(-78, 0, -70), Vector3(22, 6.0, 16), Color(0.42, 0.40, 0.35)) # warehouse
+
+    # Industrial cover: shipping containers, crates and sandbag lines.
+    for i in range(4):
+        var container_color := [Color(0.48, 0.16, 0.12), Color(0.13, 0.29, 0.34), Color(0.39, 0.40, 0.31), Color(0.56, 0.42, 0.20)][i]
+        _box(Vector3(-60 + i * 12, 1.25, 45), Vector3(10.5, 2.5, 3.2), container_color, true)
+        _box(Vector3(-60 + i * 12, 1.25, 48.4), Vector3(10.5, 2.5, 0.12), Color(0.10, 0.12, 0.12), false)
+    for i in range(8):
+        _box(Vector3(73 + i * 1.35, 0.45, -48), Vector3(1.3, 0.9, 0.75), Color(0.62, 0.54, 0.39), true)
+        _box(Vector3(-88 + i * 1.35, 0.42, -56), Vector3(1.25, 0.84, 0.7), Color(0.58, 0.49, 0.35), true)
+
+    # A visible elevated lookout tower with climbable-looking silhouette.
+    for side in [-1.0, 1.0]:
+        for depth in [-1.0, 1.0]:
+            _box(Vector3(42 + side * 2.8, 3.0, 54 + depth * 2.8), Vector3(0.32, 6.0, 0.32), Color(0.27, 0.23, 0.18), true)
+    _box(Vector3(42, 6.1, 54), Vector3(7.2, 0.45, 7.2), Color(0.34, 0.29, 0.22), true)
+    _box(Vector3(42, 8.3, 54), Vector3(8.0, 0.35, 8.0), Color(0.22, 0.19, 0.16), true)
+    _box(Vector3(42, 7.0, 54), Vector3(6.8, 1.35, 0.18), Color(0.16, 0.18, 0.15), true)
+
+func _landmark_building(center: Vector3, size: Vector3, wall_color: Color) -> void:
+    _box(center + Vector3(0, size.y * 0.5, 0), size, wall_color, true)
+    _box(center + Vector3(0, size.y + 0.25, 0), size + Vector3(1.2, 0.5, 1.2), Color(0.22, 0.19, 0.16), false)
+    # Door and shaded window panels on the front wall.
+    _box(center + Vector3(0, 1.15, size.z * 0.5 + 0.04), Vector3(1.25, 2.3, 0.12), Color(0.15, 0.10, 0.065), false)
+    for side in [-1.0, 1.0]:
+        _box(center + Vector3(side * size.x * 0.28, 2.4, size.z * 0.5 + 0.06), Vector3(1.5, 0.95, 0.10), Color(0.16, 0.27, 0.30), false)
+        _box(center + Vector3(side * size.x * 0.28, 2.4, size.z * 0.5 + 0.12), Vector3(1.62, 0.12, 0.12), Color(0.25, 0.22, 0.18), false)
 
 func _box(pos: Vector3, size: Vector3, color: Color, solid: bool):
     var root = StaticBody3D.new() if solid else Node3D.new()
