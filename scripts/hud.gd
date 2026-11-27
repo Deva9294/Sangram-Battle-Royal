@@ -201,17 +201,21 @@ func show_spectator(killer_name: String) -> void:
     layout.add_child(row)
     var previous := Button.new()
     previous.text = "◀ PREVIOUS"
-    previous.pressed.connect(func(): if is_instance_valid(game_manager): game_manager.spectator_next(-1))
+    previous.pressed.connect(func(): _spectator_change(-1))
     row.add_child(previous)
     var next := Button.new()
     next.text = "NEXT ▶"
-    next.pressed.connect(func(): if is_instance_valid(game_manager): game_manager.spectator_next(1))
+    next.pressed.connect(func(): _spectator_change(1))
     row.add_child(next)
     var note := Label.new()
     note.text = "SPECTATING • WAIT FOR MATCH END"
     note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     note.add_theme_font_size_override("font_size", 12)
     layout.add_child(note)
+
+func _spectator_change(direction: int) -> void:
+    if is_instance_valid(game_manager):
+        game_manager.spectator_next(direction)
 
 func update_spectator_name(killer_name: String) -> void:
     if not is_instance_valid(spectator_panel):
