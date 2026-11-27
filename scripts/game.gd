@@ -5,7 +5,7 @@ const BotScript = preload("res://scripts/bot.gd")
 const LootScript = preload("res://scripts/loot_pickup.gd")
 var player
 var hud
-var bot_count := 12
+var bot_count := 8
 var elapsed := 0.0
 var battle_start_grace := 12.0
 var safe_radius := 95.0
@@ -58,7 +58,17 @@ func _build_world():
     environment.sky = Sky.new()
     environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
     environment.ambient_light_color = Color(0.62, 0.72, 0.82)
-    environment.ambient_light_energy = 0.8
+    environment.ambient_light_energy = 0.85
+    var sky_material := ProceduralSkyMaterial.new()
+    sky_material.sky_top_color = Color(0.12, 0.25, 0.39)
+    sky_material.sky_horizon_color = Color(0.72, 0.66, 0.51)
+    sky_material.ground_bottom_color = Color(0.12, 0.14, 0.10)
+    sky_material.ground_horizon_color = Color(0.42, 0.40, 0.30)
+    environment.sky.sky_material = sky_material
+    environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+    environment.fog_enabled = true
+    environment.fog_light_color = Color(0.66, 0.68, 0.60)
+    environment.fog_density = 0.0018
     env.environment = environment
     add_child(env)
     var sun = DirectionalLight3D.new()
@@ -85,6 +95,7 @@ func _build_world():
         _box(Vector3(-94.0 + mark * 11.0, -0.12, -38.0), Vector3(4.5, 0.025, 0.22), Color(0.78, 0.72, 0.52), false)
         _box(Vector3(-34.0, -0.10, -94.0 + mark * 11.0), Vector3(0.22, 0.025, 4.5), Color(0.78, 0.72, 0.52), false)
     _build_battle_landmarks()
+    _build_environment_details()
 
     for cluster in range(3):
         var cx = [-48.0, 8.0, 35.0][cluster]
@@ -148,11 +159,57 @@ func _build_battle_landmarks() -> void:
 func _landmark_building(center: Vector3, size: Vector3, wall_color: Color) -> void:
     _box(center + Vector3(0, size.y * 0.5, 0), size, wall_color, true)
     _box(center + Vector3(0, size.y + 0.25, 0), size + Vector3(1.2, 0.5, 1.2), Color(0.22, 0.19, 0.16), false)
-    # Door and shaded window panels on the front wall.
+    # Shaded entrance, raised porch and framed windows.
     _box(center + Vector3(0, 1.15, size.z * 0.5 + 0.04), Vector3(1.25, 2.3, 0.12), Color(0.15, 0.10, 0.065), false)
+    _box(center + Vector3(0, 0.18, size.z * 0.5 + 1.1), Vector3(3.8, 0.36, 2.4), Color(0.47, 0.42, 0.34), true)
+    _box(center + Vector3(0, size.y + 0.62, size.z * 0.5 + 1.0), Vector3(4.4, 0.22, 2.8), Color(0.25, 0.20, 0.16), false)
     for side in [-1.0, 1.0]:
+        _box(center + Vector3(side * 1.65, 1.45, size.z * 0.5 + 1.0), Vector3(0.16, 2.5, 0.16), Color(0.31, 0.25, 0.18), true)
         _box(center + Vector3(side * size.x * 0.28, 2.4, size.z * 0.5 + 0.06), Vector3(1.5, 0.95, 0.10), Color(0.16, 0.27, 0.30), false)
         _box(center + Vector3(side * size.x * 0.28, 2.4, size.z * 0.5 + 0.12), Vector3(1.62, 0.12, 0.12), Color(0.25, 0.22, 0.18), false)
+
+func _build_environment_details() -> void:
+    # Lightweight procedural scrub, boulders and roadside fence dressing.
+    for i in range(54):
+        var x := randf_range(-98.0, 98.0)
+        var z := randf_range(-98.0, 98.0)
+        if Vector2(x, z).length() < 18.0 or absf(x - 63.0) < 10.0:
+            continue
+        var shrub := MeshInstance3D.new()
+        var shrub_mesh := SphereMesh.new()
+        shrub_mesh.radius = randf_range(0.35, 0.75)
+        shrub_mesh.height = randf_range(0.55, 1.15)
+        shrub.mesh = shrub_mesh
+        shrub.position = Vector3(x, shrub_mesh.height * 0.42, z)
+        shrub.scale = Vector3(1.25, 0.72, 1.0)
+        var shrub_mat := StandardMaterial3D.new()
+        shrub_mat.albedo_color = [Color(0.16, 0.25, 0.10), Color(0.24, 0.29, 0.12), Color(0.31, 0.30, 0.15)][i % 3]
+        shrub_mat.roughness = 1.0
+        shrub.material_override = shrub_mat
+        add_child(shrub)
+
+    for i in range(24):
+        var x := randf_range(-92.0, 92.0)
+        var z := randf_range(-92.0, 92.0)
+        if Vector2(x, z).length() < 22.0:
+            continue
+        var rock := MeshInstance3D.new()
+        var rock_mesh := SphereMesh.new()
+        rock_mesh.radius = randf_range(0.35, 1.0)
+        rock_mesh.height = randf_range(0.45, 1.1)
+        rock.mesh = rock_mesh
+        rock.position = Vector3(x, rock_mesh.height * 0.30, z)
+        rock.rotation = Vector3(randf_range(-0.3, 0.3), randf_range(0.0, TAU), randf_range(-0.2, 0.2))
+        rock.scale = Vector3(1.4, 0.75, 1.0)
+        var rock_mat := StandardMaterial3D.new()
+        rock_mat.albedo_color = Color(0.34, 0.32, 0.27)
+        rock_mat.roughness = 1.0
+        rock.material_override = rock_mat
+        add_child(rock)
+
+    for i in range(18):
+        var x := -92.0 + float(i) * 10.5
+        _box(Vector3(x, 0.62, -31.0), Vector3(0.16, 1.24, 0.16), Color(0.35, 0.27, 0.17), true)
 
 func _box(pos: Vector3, size: Vector3, color: Color, solid: bool):
     var root = StaticBody3D.new() if solid else Node3D.new()
@@ -190,7 +247,7 @@ func _tree(pos: Vector3):
 func _spawn_player():
     player = CharacterBody3D.new()
     player.set_script(PlayerScript)
-    player.position = Vector3(-12.0, 92.0, 8.0)
+    player.position = Vector3(-12.0, 32.0, 8.0)
     player.parachuting = true
     add_child(player)
     var canopy_script = load("res://scripts/parachute_visual.gd")
