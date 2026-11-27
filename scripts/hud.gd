@@ -14,9 +14,12 @@ var mobile_left := false
 var mobile_right := false
 var mobile_forward := false
 var mobile_back := false
+var spectator_panel: Panel
+var game_manager: Node
 
 func _ready():
     set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    game_manager = get_tree().get_first_node_in_group("game_manager")
     mouse_filter = Control.MOUSE_FILTER_IGNORE
     stats = Label.new()
     stats.position = Vector2(18, 12)
@@ -170,6 +173,52 @@ func show_message(message: String):
 
 func show_damage():
     damage_time = 0.22
+
+func show_spectator(killer_name: String) -> void:
+    if spectator_panel and is_instance_valid(spectator_panel):
+        spectator_panel.queue_free()
+    spectator_panel = Panel.new()
+    spectator_panel.anchor_left = 0.5
+    spectator_panel.anchor_right = 0.5
+    spectator_panel.anchor_top = 0.0
+    spectator_panel.anchor_bottom = 0.0
+    spectator_panel.offset_left = -190
+    spectator_panel.offset_right = 190
+    spectator_panel.offset_top = 132
+    spectator_panel.offset_bottom = 246
+    add_child(spectator_panel)
+    var layout := VBoxContainer.new()
+    layout.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    spectator_panel.add_child(layout)
+    var title := Label.new()
+    title.name = "SpectatorTitle"
+    title.text = "ELIMINATED  •  KILLED BY " + killer_name
+    title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    title.add_theme_font_size_override("font_size", 17)
+    layout.add_child(title)
+    var row := HBoxContainer.new()
+    row.alignment = BoxContainer.ALIGNMENT_CENTER
+    layout.add_child(row)
+    var previous := Button.new()
+    previous.text = "◀ PREVIOUS"
+    previous.pressed.connect(func(): if is_instance_valid(game_manager): game_manager.spectator_next(-1))
+    row.add_child(previous)
+    var next := Button.new()
+    next.text = "NEXT ▶"
+    next.pressed.connect(func(): if is_instance_valid(game_manager): game_manager.spectator_next(1))
+    row.add_child(next)
+    var note := Label.new()
+    note.text = "SPECTATING • WAIT FOR MATCH END"
+    note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    note.add_theme_font_size_override("font_size", 12)
+    layout.add_child(note)
+
+func update_spectator_name(killer_name: String) -> void:
+    if not is_instance_valid(spectator_panel):
+        return
+    var title := spectator_panel.find_child("SpectatorTitle", true, false) as Label
+    if title:
+        title.text = "SPECTATING  •  " + killer_name
 
 func show_result(won: bool, final_kills := 0):
     if result_panel and is_instance_valid(result_panel): return
