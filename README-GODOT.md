@@ -19,6 +19,11 @@ Godot 4.3 Android migration track. Original Unity project and main branch remain
 - Desktop: WASD, mouse aim, left click fire, R reload, Space jump
 - Android: on-screen movement/fire/reload/jump controls; drag the right side to aim
 
+## Next update (sangram-next-update)
+- Dropped assault-rifle world pickup: the player can drop the equipped rifle with the new HUD control and recover it by interacting nearby.
+- Post-elimination spectator camera follows the bot that delivered the final hit when the killer reference is available.
+- Android CI now includes the `sangram-next-update` branch so this branch can run the same import, lobby, battle-scene smoke tests and APK export.
+
 ## Important production gaps
 This is an early offline gameplay prototype, not a finished photorealistic commercial game. Soldier visuals and much of the environment are still procedural meshes. Production work remains: rigged character animations, high-quality PBR assets, detailed terrain, proper weapon animations/audio, parachute, vehicles, navigation-mesh AI, performance profiling and real-device QA. Online multiplayer and anti-cheat are not implemented.
 
