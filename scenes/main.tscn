@@ -25,7 +25,8 @@ position = Vector3(0, -0.15, 0)
 [node name="Decor" type="Node3D" parent="."]
 [node name="Player" type="CharacterBody3D" parent="."]
 script = ExtResource("2_player")
-[node name="Body" type="MeshInstance3D" parent="Player"]
+[node name="OldCapsulePlaceholder" type="MeshInstance3D" parent="Player"]
+visible = false
 mesh = CapsuleMesh.new()
 position.y = 0.95
 [node name="Collision" type="CollisionShape3D" parent="Player"]
