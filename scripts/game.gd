@@ -56,9 +56,10 @@ func _build_world():
     var environment = Environment.new()
     environment.background_mode = Environment.BG_SKY
     environment.sky = Sky.new()
-    environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+    environment.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
     environment.ambient_light_color = Color(0.62, 0.72, 0.82)
-    environment.ambient_light_energy = 0.85
+    environment.ambient_light_energy = 0.9
+    environment.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
     var sky_material := ProceduralSkyMaterial.new()
     sky_material.sky_top_color = Color(0.12, 0.25, 0.39)
     sky_material.sky_horizon_color = Color(0.72, 0.66, 0.51)
@@ -73,8 +74,14 @@ func _build_world():
     add_child(env)
     var sun = DirectionalLight3D.new()
     sun.rotation_degrees = Vector3(-48, -32, 0)
-    sun.light_energy = 1.35
+    sun.light_energy = 1.25
     sun.shadow_enabled = true
+    sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+    sun.directional_shadow_max_distance = 115.0
+    sun.directional_shadow_fade_start = 0.82
+    sun.shadow_bias = 0.08
+    sun.shadow_normal_bias = 1.4
+    sun.light_angular_distance = 0.35
     add_child(sun)
 
     _build_textured_terrain()
