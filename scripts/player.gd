@@ -211,7 +211,8 @@ func _play_visual_animation(animation_name: String) -> void:
         if selected == "" and candidate_lower.contains(wanted):
             selected = candidate
     if selected != "" and visual_animation_name != selected:
-        visual_animation.play(selected)
+        # Cross-fade locomotion clips instead of snapping between poses.
+        visual_animation.play(selected, 0.18)
         visual_animation_name = selected
 
 func _update_visual_animation() -> void:
