@@ -12,7 +12,7 @@ on:
       - '.github/workflows/godot-android.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   android:
@@ -69,6 +69,37 @@ jobs:
           godot --version
           java -version
           sdkmanager --list_installed
+
+      - name: Download and vendor CC0 game assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets/characters/soldier assets/animations/quaternius assets/environment/buildings assets/environment/grass assets/licenses
+          BASE=https://raw.githubusercontent.com/Seyamalam/blood-league-kickoff/aa02a4e6d8337a0604d2da131bcbbeb1f01badf0/public/assets/vendor/quaternius
+          curl -fL "$BASE/night-striker.glb" -o assets/characters/soldier/soldier.glb
+          curl -fL "$BASE/universal-animation-library.glb" -o assets/animations/quaternius/universal-animation-library.glb
+          curl -fL "$BASE/LICENSE-BASE-CHARACTERS.txt" -o assets/licenses/QUATERNIUS-BASE-CHARACTERS.txt
+          curl -fL "$BASE/LICENSE-ANIMATIONS.txt" -o assets/licenses/QUATERNIUS-ANIMATIONS.txt
+          CITY=https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/city-kit-suburban
+          for model in building-type-a building-type-b building-type-c building-type-d; do
+            curl -fL "$CITY/${model}.glb" -o "assets/environment/buildings/${model}.glb"
+          done
+          GRASS=https://raw.githubusercontent.com/Seyamalam/blood-league-kickoff/aa02a4e6d8337a0604d2da131bcbbeb1f01badf0/public/assets/vendor/ambientcg/grass007
+          for map in color normal-gl roughness; do
+            curl -fL "$GRASS/${map}.jpg" -o "assets/environment/grass/${map}.jpg"
+          done
+          printf 'CC0 asset sources for Sangram\\n\\n- Quaternius Universal Base Characters + Universal Animation Library: https://quaternius.com/ (CC0 1.0)\\n- Kenney City Kit Suburban GLB models mirrored at https://github.com/Hidencod/tge-assets (Kenney CC0 1.0)\\n- ambientCG Grass 007 PBR maps: https://ambientcg.com/view?id=Grass007 (CC0 1.0)\\n' > assets/ASSET_SOURCES.md
+          test "$(head -c 4 assets/characters/soldier/soldier.glb)" = "glTF"
+          test "$(head -c 4 assets/animations/quaternius/universal-animation-library.glb)" = "glTF"
+          echo "Downloaded asset sizes:"
+          du -h assets/characters/soldier/soldier.glb assets/animations/quaternius/universal-animation-library.glb assets/environment/buildings/*.glb assets/environment/grass/*.jpg
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets
+          if ! git diff --cached --quiet; then
+            git commit -m "Add free CC0 soldier, animation, building and PBR assets"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
 
       - name: Import project resources
         run: godot --headless --editor --path . --quit
