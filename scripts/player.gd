@@ -19,12 +19,16 @@ const CROUCH_CAMERA := Vector3(0.32, 0.10, 1.62)
 const PRONE_CAMERA := Vector3(0.28, 0.10, 1.42)
 const STAND_FOV := 58.0
 const ADS_FOV := 48.0
+const WeaponPickupScript = preload("res://scripts/weapon_pickup.gd")
 
 var health := 100.0
 var armor := 0.0
 var medkits := 0
 var ammo := 30
 var reserve_ammo := 120
+var has_weapon := true
+var current_weapon := "Assault Rifle"
+var weapon_mount: Node3D
 var fire_cooldown := 0.0
 var reload_time := 0.0
 var mobile_move := Vector2.ZERO
@@ -134,7 +138,7 @@ func _attach_rifle_model() -> void:
     var weapon := packed.instantiate() as Node3D
     if weapon == null:
         return
-    var weapon_mount := Node3D.new()
+    weapon_mount = Node3D.new()
     weapon_mount.position = Vector3(0.34, 1.22, -0.34)
     weapon_mount.rotation_degrees = Vector3(0.0, 90.0, 0.0)
     weapon_mount.scale = Vector3.ONE * 0.55
@@ -390,12 +394,12 @@ func _update_reload(delta: float) -> void:
         return
     reload_time = maxf(0.0, reload_time - delta)
     if reload_time == 0.0:
-        var take := mini(30 - ammo, reserve_ammo)
+        var take := mini(_magazine_size() - ammo, reserve_ammo)
         ammo += take
         reserve_ammo -= take
 
 func shoot() -> void:
-    if fire_cooldown > 0.0 or reload_time > 0.0 or ammo <= 0:
+    if not has_weapon or fire_cooldown > 0.0 or reload_time > 0.0 or ammo <= 0:
         return
     ammo -= 1
     fire_cooldown = fire_interval
@@ -414,8 +418,44 @@ func shoot() -> void:
             target.call("take_damage", bullet_damage, self)
 
 func reload() -> void:
-    if reload_time <= 0.0 and ammo < 30 and reserve_ammo > 0:
+    if has_weapon and reload_time <= 0.0 and ammo < _magazine_size() and reserve_ammo > 0:
         reload_time = 1.6
+
+func _magazine_size() -> int:
+    return 30
+
+func equip_weapon(weapon_type: String, picked_ammo: int = 30) -> void:
+    if has_weapon:
+        _spawn_weapon_pickup(current_weapon, ammo, global_position + transform.basis.x * 1.1)
+    current_weapon = weapon_type
+    has_weapon = true
+    ammo = clampi(picked_ammo, 1, _magazine_size())
+    reserve_ammo = mini(240, reserve_ammo + 30)
+    _attach_rifle_model()
+    if hud:
+        hud.show_message("%s EQUIPPED" % current_weapon.to_upper())
+
+func drop_weapon() -> void:
+    if not has_weapon:
+        if hud:
+            hud.show_message("NO WEAPON TO DROP")
+        return
+    _spawn_weapon_pickup(current_weapon, ammo, global_position + transform.basis.x * 1.1)
+    has_weapon = false
+    ammo = 0
+    if weapon_mount and is_instance_valid(weapon_mount):
+        weapon_mount.queue_free()
+        weapon_mount = null
+    if hud:
+        hud.show_message("WEAPON DROPPED")
+
+func _spawn_weapon_pickup(weapon_type: String, weapon_ammo: int, at_position: Vector3) -> void:
+    var pickup := Area3D.new()
+    pickup.set_script(WeaponPickupScript)
+    pickup.set("weapon_type", weapon_type)
+    pickup.set("ammo_amount", maxi(1, weapon_ammo))
+    get_parent().add_child(pickup)
+    pickup.global_position = at_position
 
 func take_damage(amount: float) -> void:
     if eliminated or spawn_protection > 0.0:
@@ -455,7 +495,9 @@ func add_loot(loot_type: String, amount: int) -> void:
 func interact() -> void:
     var nearest: Node = null
     var nearest_distance := 3.0
-    for pickup in get_tree().get_nodes_in_group("loot"):
+    var candidates: Array[Node] = get_tree().get_nodes_in_group("loot")
+    candidates.append_array(get_tree().get_nodes_in_group("weapon_pickups"))
+    for pickup in candidates:
         if not is_instance_valid(pickup):
             continue
         var distance := global_position.distance_to(pickup.global_position)
@@ -465,7 +507,7 @@ func interact() -> void:
     if nearest and nearest.has_method("collect"):
         nearest.call("collect", self)
     elif hud:
-        hud.show_message("NO LOOT NEARBY")
+        hud.show_message("NO LOOT OR WEAPON NEARBY")
 
 func use_medkit() -> void:
     if medkits <= 0 or health >= 100.0:
