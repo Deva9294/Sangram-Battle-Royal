@@ -36,6 +36,7 @@ var mobile_fire := false
 var look_touch := -1
 var look_last := Vector2.ZERO
 var eliminated := false
+var killer: Node = null
 var camera: Camera3D
 var camera_pivot: Node3D
 var gun_ray: RayCast3D
@@ -457,9 +458,11 @@ func _spawn_weapon_pickup(weapon_type: String, weapon_ammo: int, at_position: Ve
     get_parent().add_child(pickup)
     pickup.global_position = at_position
 
-func take_damage(amount: float) -> void:
+func take_damage(amount: float, attacker: Node = null) -> void:
     if eliminated or spawn_protection > 0.0:
         return
+    if attacker != null:
+        killer = attacker
     var absorbed := minf(armor, amount * 0.65)
     armor -= absorbed
     health = maxf(0.0, health - (amount - absorbed))
@@ -468,9 +471,7 @@ func take_damage(amount: float) -> void:
     if health <= 0.0:
         eliminated = true
         _play_visual_animation("Death")
-        if hud:
-            hud.show_result(false)
-        get_tree().call_group("game_manager", "player_eliminated")
+        get_tree().call_group("game_manager", "player_eliminated", killer)
 
 func heal(amount: float) -> void:
     health = minf(100.0, health + amount)
