@@ -25,7 +25,7 @@ func _unhandled_input(event: InputEvent) -> void:
     elif event is InputEventMouseButton and event.pressed:
         Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
     elif event is InputEventScreenTouch:
-        if event.pressed and event.position.x > get_viewport_rect().size.x * 0.42 and look_touch_id == -1:
+        if event.pressed and event.position.x > get_viewport().get_visible_rect().size.x * 0.42 and look_touch_id == -1:
             look_touch_id = event.index
         elif not event.pressed and event.index == look_touch_id:
             look_touch_id = -1
