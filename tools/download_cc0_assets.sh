@@ -21,9 +21,12 @@ download() {
 
 # CC0 rigged soldier models (Gobkit).
 CHAR_BASE="https://gobkit.com/freebies/human004"
-for model in Rifleman ReconScout ArmySniper CombatMedic; do
+for model in Rifleman ReconScout ArmySniper CombatMedic ArmyOfficer ArmyGeneral MachineGunner CombatEngineer; do
   download "$CHAR_BASE/$model.glb" "$CHAR_DIR/$model.glb"
 done
+
+# Mid-poly PBR military character (MIT; license embedded in GLB).
+download "https://models.codelove.in/models/military-male-03.glb" "$CHAR_DIR/MaleSoldier03.glb"
 
 # CC0 Kenney City Kit Suburban building and tree models.
 ENV_BASE="https://raw.githubusercontent.com/petroulacl/fps-buildings-env-kit/main"
