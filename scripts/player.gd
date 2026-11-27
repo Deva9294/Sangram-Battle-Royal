@@ -111,6 +111,7 @@ func _build_player_visual() -> void:
                 visual_animation = null
     if visual_animation == null:
         _build_procedural_soldier()
+    _attach_rifle_model()
 
     muzzle_flash = OmniLight3D.new()
     muzzle_flash.position = Vector3(0.35, 1.23, -1.12)
@@ -118,6 +119,23 @@ func _build_player_visual() -> void:
     muzzle_flash.light_energy = 0.0
     muzzle_flash.omni_range = 4.0
     visual_root.add_child(muzzle_flash)
+
+func _attach_rifle_model() -> void:
+    var weapon_path := "res://assets/weapons/Rifle_Assault_West.glb"
+    if not ResourceLoader.exists(weapon_path):
+        return
+    var packed := load(weapon_path) as PackedScene
+    if packed == null:
+        return
+    var weapon := packed.instantiate() as Node3D
+    if weapon == null:
+        return
+    var weapon_mount := Node3D.new()
+    weapon_mount.position = Vector3(0.34, 1.22, -0.34)
+    weapon_mount.rotation_degrees = Vector3(0.0, 90.0, 0.0)
+    weapon_mount.scale = Vector3.ONE * 0.55
+    visual_root.add_child(weapon_mount)
+    weapon_mount.add_child(weapon)
 
 func _fit_character_model(model: Node3D, target_height: float) -> void:
     # Imported GLB assets use inconsistent units/origin; normalize to human scale.
@@ -150,9 +168,6 @@ func _build_procedural_soldier() -> void:
     _soldier_part(Vector3(0.18, 0.39, 0), Vector3(0.23, 0.72, 0.25), Color(0.10, 0.13, 0.11))
     _soldier_part(Vector3(-0.18, 0.06, 0.08), Vector3(0.32, 0.16, 0.44), Color(0.045, 0.05, 0.045))
     _soldier_part(Vector3(0.18, 0.06, 0.08), Vector3(0.32, 0.16, 0.44), Color(0.045, 0.05, 0.045))
-    _soldier_part(Vector3(0.35, 1.23, -0.43), Vector3(0.13, 0.13, 0.82), Color(0.045, 0.052, 0.048))
-    _soldier_part(Vector3(0.35, 1.23, -0.88), Vector3(0.085, 0.085, 0.36), Color(0.08, 0.09, 0.08))
-    _soldier_part(Vector3(0.35, 1.23, -0.08), Vector3(0.17, 0.22, 0.18), Color(0.075, 0.08, 0.075))
     _soldier_part(Vector3(-0.2, 1.12, -0.12), Vector3(0.16, 0.22, 0.14), Color(0.62, 0.43, 0.18))
     _soldier_part(Vector3(0.0, 1.12, -0.12), Vector3(0.16, 0.22, 0.14), Color(0.62, 0.43, 0.18))
 
