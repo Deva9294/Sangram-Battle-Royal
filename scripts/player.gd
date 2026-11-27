@@ -95,21 +95,25 @@ func _build_player_visual() -> void:
     visual_root = Node3D.new()
     add_child(visual_root)
     var model_path := "res://assets/characters/ReconScout.glb"
+    var imported_model_loaded := false
     if ResourceLoader.exists(model_path):
         var model_scene := load(model_path) as PackedScene
         if model_scene:
             var model := model_scene.instantiate() as Node3D
-            model.rotation.y = PI
-            visual_root.add_child(model)
-            _fit_character_model(model, 2.0)
-            model.visible = true
-            _set_model_meshes_visible(model)
-            visual_animation = _find_animation_player(model)
-            _play_visual_animation("Idle")
-            if not _contains_renderable_mesh(model):
-                model.queue_free()
-                visual_animation = null
-    if visual_animation == null:
+            if model:
+                model.rotation.y = PI
+                visual_root.add_child(model)
+                _fit_character_model(model, 2.0)
+                model.visible = true
+                _set_model_meshes_visible(model)
+                imported_model_loaded = _contains_renderable_mesh(model)
+                if imported_model_loaded:
+                    visual_animation = _find_animation_player(model)
+                    _play_visual_animation("idle")
+                else:
+                    model.queue_free()
+    # Keep a valid imported soldier even when its animation node is absent.
+    if not imported_model_loaded:
         _build_procedural_soldier()
     _attach_rifle_model()
 
@@ -195,9 +199,20 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
     return null
 
 func _play_visual_animation(animation_name: String) -> void:
-    if visual_animation and visual_animation.has_animation(animation_name) and visual_animation_name != animation_name:
-        visual_animation.play(animation_name)
-        visual_animation_name = animation_name
+    if visual_animation == null:
+        return
+    var wanted := animation_name.to_lower()
+    var selected := ""
+    for candidate in visual_animation.get_animation_list():
+        var candidate_lower := candidate.to_lower()
+        if candidate_lower == wanted:
+            selected = candidate
+            break
+        if selected == "" and candidate_lower.contains(wanted):
+            selected = candidate
+    if selected != "" and visual_animation_name != selected:
+        visual_animation.play(selected)
+        visual_animation_name = selected
 
 func _update_visual_animation() -> void:
     if visual_animation == null:
