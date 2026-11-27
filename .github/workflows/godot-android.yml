@@ -3,7 +3,7 @@ name: SANGRAM Godot Android APK - Gameplay Update
 on:
   workflow_dispatch:
   push:
-    branches: [godot-migration, mp-lobby-upgrade, godot-player-upgrade]
+    branches: [godot-migration, mp-lobby-upgrade, godot-player-upgrade, sangram-next-update]
     paths:
       - 'project.godot'
       - 'scenes/**'
