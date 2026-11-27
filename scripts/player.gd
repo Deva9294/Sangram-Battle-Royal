@@ -14,10 +14,10 @@ class_name SangramPlayer
 const STAND_HEIGHT := 1.8
 const CROUCH_HEIGHT := 1.2
 const PRONE_HEIGHT := 0.90
-const STAND_CAMERA := Vector3(0.48, 0.18, 2.45)
-const CROUCH_CAMERA := Vector3(0.48, 0.08, 2.25)
-const PRONE_CAMERA := Vector3(0.42, 0.12, 1.95)
-const STAND_FOV := 62.0
+const STAND_CAMERA := Vector3(0.34, 0.16, 1.72)
+const CROUCH_CAMERA := Vector3(0.32, 0.10, 1.62)
+const PRONE_CAMERA := Vector3(0.28, 0.10, 1.42)
+const STAND_FOV := 58.0
 const ADS_FOV := 48.0
 
 var health := 100.0
@@ -94,7 +94,7 @@ func _ready() -> void:
 func _build_player_visual() -> void:
     visual_root = Node3D.new()
     add_child(visual_root)
-    var model_path := "res://assets/characters/MaleSoldier03.glb"
+    var model_path := "res://assets/characters/InfantrySoldier.glb"
     var imported_model_loaded := false
     if ResourceLoader.exists(model_path):
         var model_scene := load(model_path) as PackedScene
@@ -103,7 +103,7 @@ func _build_player_visual() -> void:
             if model:
                 model.rotation.y = PI
                 visual_root.add_child(model)
-                _fit_character_model(model, 2.0)
+                _fit_character_model(model, 1.82)
                 model.visible = true
                 _set_model_meshes_visible(model)
                 imported_model_loaded = _contains_renderable_mesh(model)
@@ -220,7 +220,7 @@ func _update_visual_animation() -> void:
     var horizontal_speed := Vector2(velocity.x, velocity.z).length()
     var next_animation := "Idle"
     if horizontal_speed > 0.2:
-        next_animation = "Run" if Input.is_action_pressed("sprint") else "Walk"
+        next_animation = "Run" if horizontal_speed > move_speed * 0.88 else "Walk"
     _play_visual_animation(next_animation)
 
 func _soldier_part(pos: Vector3, size: Vector3, color: Color, sphere := false) -> void:
